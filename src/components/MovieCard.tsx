@@ -27,8 +27,9 @@ export function MovieCard({
         {movie.title}
       </div>
       <div className="text-muted text-[13px] mt-0.5 truncate">
-        {movie.year}, {movie.moods[0]}
-        {movie.moods.length > 1 ? ` +${movie.moods.length - 1}` : ''}
+        {movie.year}
+        {movie.moods && movie.moods.length > 0 ? `, ${movie.moods[0]}` : ''}
+        {movie.moods && movie.moods.length > 1 ? ` +${movie.moods.length - 1}` : ''}
       </div>
     </>
   );

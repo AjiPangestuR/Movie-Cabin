@@ -62,6 +62,21 @@ export async function listMoods(): Promise<Mood[]> {
     return [];
   }
 
+  // Jika user aktif belum memiliki mood di database (misal sesi sudah aktif sebelum migrasi dijalankan),
+  // jalankan ensureDefaultMoods() sebagai inisialisasi agar halaman mood tidak kosong tanpa penjelasan.
+  if (!data || data.length === 0) {
+    try {
+      await ensureDefaultMoods();
+      const refetched = await supabase
+        .from('moods')
+        .select('id, name, slug')
+        .order('created_at', { ascending: true });
+      return (refetched.data || []) as Mood[];
+    } catch (e) {
+      console.warn('Fallback inisialisasi mood default di listMoods dilewati:', e);
+    }
+  }
+
   return (data || []) as Mood[];
 }
 

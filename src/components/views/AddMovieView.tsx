@@ -280,14 +280,20 @@ export function AddMovieView({ initialMoods = [] }: AddMovieViewProps) {
           <label className="mt-4 block font-medium">
             Mood <span className="text-muted font-normal text-xs">(pilih satu atau lebih)</span>
           </label>
-          <div className="mt-1">
-            <MoodChips
-              moods={availableMoods}
-              selectedMoods={selectedMoods}
-              onToggle={handleToggleMood}
-              wrap
-            />
-          </div>
+          {availableMoods.length > 0 ? (
+            <div className="mt-1">
+              <MoodChips
+                moods={availableMoods}
+                selectedMoods={selectedMoods}
+                onToggle={handleToggleMood}
+                wrap
+              />
+            </div>
+          ) : (
+            <p className="text-muted text-xs mt-1.5 italic">
+              Belum ada mood tersimpan. Buat mood kustom di bawah ini untuk memulai.
+            </p>
+          )}
 
           {/* Input Mood Kustom Baru */}
           <div className="mt-3 flex items-center gap-2">
