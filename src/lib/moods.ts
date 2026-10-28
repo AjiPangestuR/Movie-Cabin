@@ -26,13 +26,24 @@ export async function generateMoodSlug(name: string): Promise<string> {
 }
 
 /**
- * Memanggil RPC ensure_default_moods() sekali setelah login
+ * Memanggil RPC ensure_default_moods() sekali setelah login.
+ * Jika percobaan pertama gagal, lakukan retry 1 kali.
+ * Jika tetap gagal, lemparkan error agar tidak ditelan diam-diam.
  */
 export async function ensureDefaultMoods(): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc('ensure_default_moods');
+  let { error } = await supabase.rpc('ensure_default_moods');
+
+  // Retry satu kali jika panggilan pertama gagal
   if (error) {
-    console.error('Gagal memastikan mood default:', error.message);
+    console.warn('Percobaan pertama ensure_default_moods gagal, mencoba ulang...', error.message);
+    const retry = await supabase.rpc('ensure_default_moods');
+    error = retry.error;
+  }
+
+  if (error) {
+    console.error('Gagal memastikan mood default setelah retry:', error.message);
+    throw new Error('Gagal menyiapkan mood default: ' + error.message);
   }
 }
 

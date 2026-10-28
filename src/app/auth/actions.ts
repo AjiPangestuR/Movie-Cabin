@@ -32,8 +32,11 @@ export async function loginAction(
   // Panggil ensure_default_moods() sekali setelah login berhasil
   try {
     await ensureDefaultMoods();
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('Error invoking ensureDefaultMoods:', err);
+    return {
+      error: 'Berhasil login, tetapi gagal menyiapkan mood default di database. Silakan coba masuk kembali.',
+    };
   }
 
   redirect('/');
