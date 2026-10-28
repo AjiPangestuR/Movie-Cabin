@@ -8,11 +8,23 @@ let moviesStore: Movie[] = INITIAL_MOVIES.map((m) => ({
   log: m.log ? { ...m.log } : undefined,
 }));
 
+// Cached snapshot for useSyncExternalStore referential stability
+let cachedSnapshot: Movie[] = [...moviesStore];
+
+function updateSnapshot(): void {
+  cachedSnapshot = moviesStore.map((m) => ({
+    ...m,
+    moods: [...m.moods],
+    log: m.log ? { ...m.log } : undefined,
+  }));
+}
+
 // Listener subscription mechanism for reactive UI updates across client components
 type Listener = () => void;
 const listeners = new Set<Listener>();
 
 function notifyListeners(): void {
+  updateSnapshot();
   listeners.forEach((listener) => {
     try {
       listener();
@@ -29,11 +41,14 @@ export function subscribeMovies(listener: Listener): () => void {
   };
 }
 
+export function getMoviesSnapshot(): Movie[] {
+  return cachedSnapshot;
+}
+
 /**
  * Mendapatkan daftar seluruh film di kabin (in-memory)
  */
 export async function listMovies(): Promise<Movie[]> {
-  // Return shallow copy array with clone to prevent direct outside mutations
   return moviesStore.map((m) => ({
     ...m,
     moods: [...m.moods],

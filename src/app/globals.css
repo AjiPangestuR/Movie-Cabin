@@ -78,6 +78,148 @@ h2 {
   margin-bottom: 4px;
 }
 
+.muted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sec {
+  margin-top: 28px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 14px;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:hover {
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #15111F;
+  font-weight: 700;
+}
+
+.btn.primary:hover {
+  opacity: 0.92;
+}
+
+.btn.danger {
+  color: var(--danger);
+}
+
+.btn.danger:hover {
+  border-color: rgba(224, 108, 139, 0.5);
+}
+
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.link {
+  color: var(--accent);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.link:hover {
+  opacity: 0.85;
+}
+
+input[type="text"], textarea, select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 14px;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  margin: 16px 0 6px;
+  font-size: 14px;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.score {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.score div {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.score b {
+  font-family: var(--serif);
+  font-size: 20px;
+}
+
+.res {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-top: 8px;
+  transition: border-color 0.15s ease;
+}
+
+.res:hover {
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
