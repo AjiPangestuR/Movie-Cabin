@@ -3,9 +3,9 @@
 Dokumen ini menampung ide dan kebutuhan fitur yang berada di luar cakupan Phase 2.
 
 ## Mood Management (Post Phase 2)
-- [ ] Ubah nama mood kustom
-- [ ] Hapus mood kustom (dengan handling relasi ke film terkait)
-- [ ] Warna/tag kustom per mood
+- [ ] Policy UPDATE pada tabel `moods` untuk fitur ubah nama mood kustom
+- [ ] Policy DELETE pada tabel `moods` untuk fitur hapus mood kustom (dengan handling relasi ke film terkait)
+- [ ] Warna/tag visual kustom per mood
 
 ## Phase 3: TMDB Metadata Integration
 - [ ] Pengambilan data asli via TMDB API (pencarian judul, poster resmi, metadata lengkap)
