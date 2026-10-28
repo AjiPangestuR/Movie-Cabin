@@ -6,20 +6,20 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({
-  message = 'Memuat data...',
+  message = 'Memuat arsip film...',
   className = '',
 }: LoadingSpinnerProps) {
   return (
     <div
       role="status"
       aria-live="polite"
-      className={`flex flex-col items-center justify-center p-8 text-center ${className}`}
+      className={`flex flex-col items-center justify-center p-12 text-center ${className}`}
     >
-      <div className="relative w-8 h-8">
-        <div className="absolute inset-0 rounded-full border-2 border-line" />
-        <div className="absolute inset-0 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+      <div className="relative w-9 h-9">
+        <div className="absolute inset-0 rounded-full border border-line" />
+        <div className="absolute inset-0 rounded-full border border-accent border-t-transparent animate-spin" />
       </div>
-      <p className="text-muted text-sm mt-3 font-medium">{message}</p>
+      <p className="text-muted text-xs sm:text-sm mt-4 font-mono tracking-wide">{message}</p>
     </div>
   );
 }

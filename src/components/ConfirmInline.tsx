@@ -20,27 +20,29 @@ export function ConfirmInline({
   promptText = 'Hapus film dan catatannya?',
   confirmText = 'Ya, hapus',
   cancelText = 'Batal',
-  triggerText = 'Hapus',
+  triggerText = 'Hapus film',
   className = '',
 }: ConfirmInlineProps) {
   if (isConfirming) {
     return (
-      <div className={`inline-flex items-center gap-2 flex-wrap ${className}`}>
-        <span className="text-muted text-sm">{promptText}</span>
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="inline-flex items-center justify-center gap-2 px-[18px] py-[11px] rounded-xl border border-line bg-surface text-danger font-medium hover:border-danger/50 focus-visible:outline-2 focus-visible:outline-accent"
-        >
-          {confirmText}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex items-center justify-center gap-2 px-[18px] py-[11px] rounded-xl border border-line bg-surface text-text font-medium hover:border-accent/40 focus-visible:outline-2 focus-visible:outline-accent"
-        >
-          {cancelText}
-        </button>
+      <div className={`inline-flex items-center gap-2.5 flex-wrap p-2 rounded-lg bg-surface border border-danger/30 ${className}`}>
+        <span className="text-muted text-xs sm:text-sm pl-1">{promptText}</span>
+        <div className="inline-flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="px-3 py-1.5 rounded-md border border-danger/40 bg-danger/10 text-danger text-xs font-medium hover:bg-danger/20 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-danger"
+          >
+            {confirmText}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-3 py-1.5 rounded-md border border-line bg-surface text-text-subtle text-xs font-medium hover:text-text hover:bg-surface-elevated transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            {cancelText}
+          </button>
+        </div>
       </div>
     );
   }
@@ -49,7 +51,7 @@ export function ConfirmInline({
     <button
       type="button"
       onClick={onInitiate}
-      className={`inline-flex items-center justify-center gap-2 px-[18px] py-[11px] rounded-xl border border-line bg-surface text-danger font-medium hover:border-danger/50 focus-visible:outline-2 focus-visible:outline-accent ${className}`}
+      className={`px-3.5 py-2 rounded-lg border border-line/80 bg-surface/60 text-danger text-xs sm:text-sm font-medium hover:bg-danger/10 hover:border-danger/30 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-danger ${className}`}
     >
       {triggerText}
     </button>

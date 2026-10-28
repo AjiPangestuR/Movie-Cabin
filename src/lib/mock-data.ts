@@ -1,81 +1,12 @@
-import { Movie, CatalogMovie } from '@/types';
+import { CatalogMovie } from '@/types';
 
-export const MOODS: string[] = [
-  'Psikologis',
-  'Emosional',
-  'Romantis',
-  'Coming of Age',
-  'Gelap',
-  'Intens',
-  'Reflektif',
-];
-
-export const INITIAL_MOVIES: Movie[] = [
-  {
-    id: '00000000-0000-0000-0000-000000000001',
-    tmdbId: 37165,
-    title: 'The Truman Show',
-    year: 1998,
-    runtime: 103,
-    moods: ['Reflektif', 'Coming of Age'],
-    synopsis: 'Seorang agen asuransi mulai curiga bahwa seluruh hidupnya ternyata acara televisi.',
-    watchUrl: 'https://example.com/truman',
-    done: false,
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000002',
-    tmdbId: 10494,
-    title: 'Perfect Blue',
-    year: 1997,
-    runtime: 81,
-    moods: ['Psikologis', 'Gelap'],
-    synopsis: 'Penyanyi pop yang beralih jadi aktris mulai kehilangan batas antara dirinya dan peran.',
-    watchUrl: '',
-    done: false,
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000003',
-    tmdbId: 152601,
-    title: 'Her',
-    year: 2013,
-    runtime: 126,
-    moods: ['Romantis', 'Emosional'],
-    synopsis: 'Penulis yang kesepian jatuh cinta pada sistem operasi yang bisa diajak bicara.',
-    watchUrl: 'https://example.com/her',
-    done: false,
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000004',
-    tmdbId: 157336,
-    title: 'Interstellar',
-    year: 2014,
-    runtime: 169,
-    moods: ['Emosional'],
-    synopsis: 'Ayah dan mantan pilot dikirim mencari planet baru untuk manusia.',
-    watchUrl: '',
-    done: false,
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000005',
-    tmdbId: 244786,
-    title: 'Whiplash',
-    year: 2014,
-    runtime: 106,
-    moods: ['Intens'],
-    synopsis: 'Drummer muda ditempa habis-habisan oleh pengajar konservatori yang kejam.',
-    watchUrl: 'https://example.com/whiplash',
-    done: true,
-    log: {
-      rating: 9,
-      contentPotential: 8,
-      theme: 'Obsesi vs harga dari kejar sempurna',
-      scene: 'Adegan latihan sampai tangan berdarah',
-      angle: 'Kapan dedikasi berubah jadi pengorbanan yang nggak sehat?',
-      notes: 'Cocok dibedah jadi video 60 detik soal ambisi.',
-    },
-  },
-];
-
+/**
+ * Katalog Simulasi Pencarian Film (Phase 2 -> Phase 3 Boundary)
+ *
+ * Digunakan secara khusus oleh AddMovieView untuk mensimulasikan hasil pencarian judul film
+ * sebelum integrasi resmi dengan TMDB API diimplementasikan pada Phase 3.
+ * Data di bawah ini TIDAK digunakan sebagai fallback penyimpanan database film sungguhan.
+ */
 export const CATALOG: CatalogMovie[] = [
   {
     tmdb: 496243,

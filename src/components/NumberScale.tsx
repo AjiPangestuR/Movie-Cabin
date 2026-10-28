@@ -21,20 +21,25 @@ export function NumberScale({
   const numbers = Array.from({ length: count }, (_, i) => min + i);
 
   return (
-    <div className={`grid grid-cols-5 gap-2 ${className}`}>
+    <div
+      role="radiogroup"
+      aria-label={ariaLabelPrefix}
+      className={`grid grid-cols-5 sm:grid-cols-10 gap-2 sm:gap-1.5 ${className}`}
+    >
       {numbers.map((num) => {
         const isSelected = value === num;
         return (
           <button
             key={num}
             type="button"
+            role="radio"
+            aria-checked={isSelected}
             onClick={() => onChange(num)}
             aria-label={`${ariaLabelPrefix} ${num}`}
-            aria-pressed={isSelected}
-            className={`text-center py-[11px] px-0 rounded-[10px] border text-sm transition-colors focus-visible:outline-2 focus-visible:outline-accent cursor-pointer ${
+            className={`flex items-center justify-center py-2.5 sm:py-3 px-0 rounded-lg border text-sm font-medium transition-all duration-150 cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-accent ${
               isSelected
-                ? 'bg-accent border-accent text-[#15111F] font-bold'
-                : 'border-line text-muted hover:border-accent/40 bg-transparent'
+                ? 'bg-accent border-accent text-[#121017] font-bold shadow-md shadow-accent/20 scale-[1.03]'
+                : 'border-line bg-surface/60 text-muted hover:border-line-subtle hover:text-text hover:bg-surface-elevated'
             }`}
           >
             {num}

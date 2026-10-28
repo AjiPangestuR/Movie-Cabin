@@ -1,6 +1,11 @@
+import type { Metadata } from 'next';
 import { BankView } from '@/components/views/BankView';
 import { listMovies } from '@/lib/movies';
 import { listMoods } from '@/lib/moods';
+
+export const metadata: Metadata = {
+  title: 'Movie Bank — MOCAB',
+};
 
 export default async function BankPage() {
   const [movies, moods] = await Promise.all([listMovies(), listMoods()]);

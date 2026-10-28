@@ -44,7 +44,8 @@ Hanya ada 1 warna aksen. Dilarang menambahkan warna baru di luar token:
   - Variabel lingkungan ditaruh di `.env.local` dan tidak pernah di-commit ke Git.
 - **Proteksi Rute**:
   - Seluruh rute dilindungi middleware kecuali `/login` dan asset statis. Pengguna belum terautentikasi otomatis diarahkan ke `/login`.
-- **Validasi Server-Side**:
+- **Validasi Server-Side & Pure Validation Layer**:
+  - Seluruh fungsi validasi data murni (input movie, watch log, mood slug, UUID, watch URL) dan pemetaan error RPC dipusatkan di `src/lib/validations.ts` tanpa dependensi I/O eksternal.
   - Judul wajib diisi, minimal 1 mood per film, rating & potensi konten 1-10, URL tonton hanya diawali http/https, nama mood 1-24 karakter dan case-insensitive unique.
   - Validasi tidak hanya mengandalkan form client.
   - Pesan error ke pengguna berbahasa Indonesia yang aman tanpa membocorkan internal database.
@@ -58,6 +59,11 @@ Hanya ada 1 warna aksen. Dilarang menambahkan warna baru di luar token:
 - PWA / offline sync
 - AI assist / video essay script generator
 
-## 6. Keputusan Produk Mendatang (Phase 3+)
+## 6. Automated Testing & Verification
+- Pengujian unit otomatis dijalankan menggunakan test runner bawaan Node.js (`node:test` & `node:assert/strict`) tanpa menambah third-party dependencies (`npm test`).
+- File tes diletakkan di `tests/**/*.test.mjs`.
+- Semua validasi logika bisnis murni, parsing tipe, dan error mapping wajib memiliki test coverage di unit test.
+
+## 7. Keputusan Produk Mendatang (Phase 3+)
 - TMDB API server-side fetching & caching
 - Fallback poster tipografi generatif tetap dipertahankan jika poster resmi TMDB tidak tersedia

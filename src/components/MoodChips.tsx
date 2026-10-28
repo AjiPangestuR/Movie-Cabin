@@ -1,5 +1,4 @@
 import React from 'react';
-import { MOODS } from '@/lib/mock-data';
 
 interface MoodChipsProps {
   moods?: string[];
@@ -10,7 +9,7 @@ interface MoodChipsProps {
 }
 
 export function MoodChips({
-  moods = MOODS,
+  moods = [],
   selectedMoods,
   onToggle,
   wrap = false,
@@ -25,6 +24,8 @@ export function MoodChips({
 
   return (
     <div
+      role="group"
+      aria-label="Filter berdasarkan mood"
       className={`flex gap-2 py-1 px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
         wrap ? 'flex-wrap' : 'overflow-x-auto'
       } ${className}`}
@@ -37,10 +38,10 @@ export function MoodChips({
             type="button"
             onClick={() => onToggle(mood)}
             aria-pressed={active}
-            className={`flex-none px-3.5 py-[7px] rounded-full border text-sm transition-colors cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-accent ${
+            className={`flex-none px-3.5 py-1.5 rounded-full border text-xs sm:text-[13px] transition-all duration-150 cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-accent ${
               active
-                ? 'bg-accent-soft border-accent text-text font-medium'
-                : 'bg-transparent border-line text-muted hover:border-accent/40'
+                ? 'bg-accent/15 border-accent text-text font-medium shadow-xs shadow-accent/20'
+                : 'bg-surface/60 border-line text-muted hover:border-line-subtle hover:text-text hover:bg-surface-elevated'
             }`}
           >
             {mood}

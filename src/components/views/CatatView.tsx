@@ -45,7 +45,7 @@ export function CatatView({ movie }: CatatViewProps) {
         notes,
       });
 
-      showToast('Catatan tersimpan.');
+      showToast('Catatan riset tersimpan ke Arsip.');
       router.push(`/bank/${movie.id}`);
       router.refresh();
     } catch (err: unknown) {
@@ -57,78 +57,157 @@ export function CatatView({ movie }: CatatViewProps) {
   };
 
   return (
-    <div>
-      <Link href={`/bank/${movie.id}`} className="link font-medium">
-        Batal
-      </Link>
+    <div className="space-y-6 sm:space-y-8 max-w-2xl mx-auto">
+      {/* Back / Cancel Navigation */}
+      <nav aria-label="Navigasi pembatalan">
+        <Link
+          href={`/bank/${movie.id}`}
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted hover:text-accent transition-colors font-medium group"
+        >
+          <svg
+            viewBox="0 0 16 16"
+            className="w-3.5 h-3.5 fill-current transition-transform group-hover:-translate-x-0.5"
+            aria-hidden="true"
+          >
+            <path fillRule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+          </svg>
+          <span>Batal (Kembali ke detail film)</span>
+        </Link>
+      </nav>
 
-      <h1 className="mt-3">{movie.title}</h1>
-      <p className="muted">Catat sebelum kesannya hilang.</p>
+      {/* Editorial Header */}
+      <section className="border-b border-line/60 pb-6">
+        <div className="flex items-center gap-2 mb-2 text-xs font-mono tracking-widest uppercase text-muted/70">
+          <span>After Watch</span>
+          <span className="text-muted/30">/</span>
+          <span>Refleksi Sinematik</span>
+        </div>
+        <h1 className="font-serif font-bold text-2xl sm:text-3xl lg:text-4xl text-text tracking-tight leading-tight">
+          {movie.title}
+        </h1>
+        <p className="text-muted text-sm mt-1 leading-relaxed">
+          Tangkap gagasan, impresi visual, dan angle konten sebelum emosi menontonnya menguap.
+        </p>
+      </section>
 
-      <form onSubmit={handleSave}>
-        <div className="panel">
-          <label className="!mt-0">
-            Rating filmnya{' '}
-            <span className="text-muted font-normal text-xs">(1 jelek, 10 mahakarya)</span>
-          </label>
+      {/* Reflection Form */}
+      <form onSubmit={handleSave} className="space-y-6 sm:space-y-7">
+        {/* Rating 1-10 Section */}
+        <section className="panel space-y-3 bg-surface-elevated/60">
+          <div className="flex items-baseline justify-between">
+            <label className="!mt-0 text-xs font-mono uppercase tracking-wider text-muted">
+              1. Rating Film <span className="text-danger">*</span>
+            </label>
+            <span className="text-xs font-mono text-muted/80">
+              {rating ? `${rating} / 10` : 'Belum dipilih'}
+            </span>
+          </div>
+          <p className="text-xs text-muted/70 -mt-1">
+            Penilaian estetika personal (1 mengecewakan · 5 lumayan · 10 mahakarya personal).
+          </p>
           <NumberScale
             value={rating}
             onChange={setRating}
             ariaLabelPrefix="Rating film"
           />
+        </section>
 
-          <label className="mt-4">
-            Potensi jadi konten{' '}
-            <span className="text-muted font-normal text-xs">(1 susah diolah, 10 siap dibedah)</span>
-          </label>
+        {/* Content Potential 1-10 Section */}
+        <section className="panel space-y-3 bg-surface-elevated/60">
+          <div className="flex items-baseline justify-between">
+            <label className="!mt-0 text-xs font-mono uppercase tracking-wider text-muted">
+              2. Potensi Menjadi Konten <span className="text-danger">*</span>
+            </label>
+            <span className="text-xs font-mono text-accent font-semibold">
+              {contentPotential ? `${contentPotential} / 10` : 'Belum dipilih'}
+            </span>
+          </div>
+          <p className="text-xs text-muted/70 -mt-1">
+            Seberapa kaya film ini untuk dibedah (1 sulit diolah · 5 menarik · 10 bahan emas video essay).
+          </p>
           <NumberScale
             value={contentPotential}
             onChange={setContentPotential}
             ariaLabelPrefix="Potensi konten"
           />
+        </section>
 
-          <label htmlFor="f-theme">Tema</label>
-          <input
-            type="text"
-            id="f-theme"
-            placeholder="Misal: obsesi, kehilangan, mencari makna"
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-          />
+        {/* Qualitative Research Notes */}
+        <section className="panel space-y-5 bg-surface/50">
+          <h2 className="text-xs font-mono uppercase tracking-widest text-muted border-b border-line/50 pb-2">
+            3. Analisis & Catatan Penulis
+          </h2>
 
-          <label htmlFor="f-scene">Adegan yang nempel</label>
-          <input
-            type="text"
-            id="f-scene"
-            placeholder="Adegan mana yang masih kebayang?"
-            value={scene}
-            onChange={(e) => setScene(e.target.value)}
-          />
+          {/* Theme */}
+          <div className="space-y-1.5">
+            <label htmlFor="f-theme" className="!mt-0 text-xs font-medium text-text-subtle">
+              Tema Utama
+            </label>
+            <input
+              type="text"
+              id="f-theme"
+              placeholder="Misal: kesepian urban, trauma masa kecil, rekonstruksi memori..."
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              className="text-sm bg-bg border-line"
+            />
+          </div>
 
-          <label htmlFor="f-angle">Angle konten</label>
-          <input
-            type="text"
-            id="f-angle"
-            placeholder="Pertanyaan atau sudut pandang untuk videonya"
-            value={angle}
-            onChange={(e) => setAngle(e.target.value)}
-          />
+          {/* Memorable Scene */}
+          <div className="space-y-1.5">
+            <label htmlFor="f-scene" className="!mt-0 text-xs font-medium text-text-subtle">
+              Adegan yang Nempel
+            </label>
+            <input
+              type="text"
+              id="f-scene"
+              placeholder="Sekuens visual, dialog, atau shot mana yang terus membekas?"
+              value={scene}
+              onChange={(e) => setScene(e.target.value)}
+              className="text-sm bg-bg border-line"
+            />
+          </div>
 
-          <label htmlFor="f-notes">Catatan bebas</label>
-          <textarea
-            id="f-notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
+          {/* Content Angle */}
+          <div className="space-y-1.5">
+            <label htmlFor="f-angle" className="!mt-0 text-xs font-medium text-text-subtle">
+              Angle Konten / Sudut Pandang
+            </label>
+            <input
+              type="text"
+              id="f-angle"
+              placeholder="Pertanyaan utama, premis hook, atau argumen inti untuk video essay..."
+              value={angle}
+              onChange={(e) => setAngle(e.target.value)}
+              className="text-sm bg-bg border-line"
+            />
+          </div>
+
+          {/* Freeform Notes */}
+          <div className="space-y-1.5">
+            <label htmlFor="f-notes" className="!mt-0 text-xs font-medium text-text-subtle">
+              Catatan Bebas & Corat-Coret
+            </label>
+            <textarea
+              id="f-notes"
+              placeholder="Tuliskan pemikiran mengalir, kutipan dialog, atau asosiasi dengan film lain..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="text-sm bg-bg border-line min-h-[140px] leading-relaxed"
+            />
+          </div>
+        </section>
+
+        {/* Submit Button */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn primary w-full py-3 text-sm font-semibold shadow-md shadow-accent/20 cursor-pointer"
+          >
+            {submitting ? 'Menyimpan Catatan Riset...' : 'Simpan Catatan Riset'}
+          </button>
         </div>
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="btn primary w-full mt-4"
-        >
-          {submitting ? 'Menyimpan...' : 'Simpan catatan'}
-        </button>
       </form>
     </div>
   );

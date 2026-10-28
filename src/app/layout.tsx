@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Fraunces, DM_Sans } from 'next/font/google';
 import './globals.css';
+import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { ToastProvider } from '@/components/Toast';
 
@@ -17,7 +18,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'MOCAB - Movie Cabin',
+  title: 'MOCAB — Movie Cabin',
   description: 'Personal movie library dan film research companion by Beruang Sastra.',
 };
 
@@ -33,10 +34,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`${fraunces.variable} ${dmSans.variable}`}>
-      <body className="bg-bg text-text min-h-screen font-sans selection:bg-accent-soft selection:text-text">
+      <body className="bg-bg text-text min-h-screen font-sans selection:bg-accent-soft selection:text-text flex flex-col">
         <ToastProvider>
-          <div id="app" className="max-w-[880px] mx-auto px-[18px] pt-5 pb-[110px]">
-            <main id="view">{children}</main>
+          <Header />
+          <div id="app" className="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-[100px] md:pb-16">
+            <main id="view" className="w-full">
+              {children}
+            </main>
           </div>
           <BottomNav />
         </ToastProvider>
