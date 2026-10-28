@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #15111F;
+  --color-surface: #1F1A2E;
+  --color-line: #2F2744;
+  --color-text: #EDE7F6;
+  --color-muted: #A79FBF;
+  --color-accent: #A78BFA;
+  --color-accent-soft: rgba(167, 139, 250, 0.15);
+  --color-ok: #8FB89A;
+  --color-danger: #E06C8B;
+
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+:root {
+  --bg: #15111F;
+  --surface: #1F1A2E;
+  --line: #2F2744;
+  --text: #EDE7F6;
+  --muted: #A79FBF;
+  --accent: #A78BFA;
+  --accent-soft: rgba(167, 139, 250, 0.15);
+  --ok: #8FB89A;
+  --danger: #E06C8B;
+  --serif: var(--font-fraunces), Georgia, serif;
+  --sans: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  text-align: left;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+h1, h2, h3, .serif {
+  font-family: var(--serif);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 30px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+h2 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

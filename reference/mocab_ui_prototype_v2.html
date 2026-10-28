@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOCAB - Movie Cabin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Design tokens: ambil dari sini saat pindah ke Tailwind (tailwind.config / CSS variables) */
+:root{--bg:#15111F;--surface:#1F1A2E;--line:#2F2744;--text:#EDE7F6;--muted:#A79FBF;--accent:#A78BFA;--accent-soft:rgba(167,139,250,.15);--ok:#8FB89A;--danger:#E06C8B;
+--serif:'Fraunces',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:400 15px/1.6 var(--sans);min-height:100vh}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;text-align:left}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#app{max-width:880px;margin:0 auto;padding:20px 18px 110px}
+h1,h2,h3,.serif{font-family:var(--serif);font-weight:700;letter-spacing:-.01em}
+h1{font-size:30px;line-height:1.2;margin-bottom:6px} h2{font-size:22px;margin-bottom:4px}
+.muted{color:var(--muted);font-size:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sec{margin-top:28px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
+.chip{flex:none;padding:7px 14px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-size:14px}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:500;text-decoration:none;color:var(--text)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#15111F;font-weight:700}
+.btn.danger{color:var(--danger)} .btn[disabled]{opacity:.45;cursor:not-allowed}
+.link{color:var(--accent);font-size:14px;text-decoration:underline;text-underline-offset:3px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:14px}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:860px){.grid.bank{grid-template-columns:repeat(4,1fr)}}
+.card{display:block;width:100%}
+.card .t{font-weight:700;margin-top:8px;line-height:1.3} .card .m{color:var(--muted);font-size:13px}
+.poster{aspect-ratio:2/3;border-radius:10px;position:relative;display:flex;align-items:flex-end;padding:12px;overflow:hidden;
+background:linear-gradient(165deg,hsl(var(--h) 38% 34%),hsl(calc(var(--h) + 45) 42% 13%));border:1px solid var(--line)}
+.poster span{font-family:var(--serif);font-weight:700;font-size:19px;line-height:1.12;color:#F4EEFB;text-wrap:balance}
+.poster.big span{font-size:28px}
+.tag{position:absolute;top:8px;right:8px;background:rgba(21,17,31,.85);border-radius:8px;padding:2px 9px;font-size:12px;color:var(--ok)}
+.tag.s{left:8px;right:auto;color:var(--text)}
+input[type=text],textarea,select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+textarea{resize:vertical;min-height:88px}
+label{display:block;font-weight:500;margin:16px 0 6px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:16px}
+.empty{margin-top:24px;padding:28px 20px;border:1px dashed var(--line);border-radius:14px;text-align:center}
+.empty p{margin-bottom:14px}
+.detail{display:grid;gap:24px;margin-top:14px}
+@media(min-width:700px){.detail{grid-template-columns:240px 1fr}}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.nums button{text-align:center;padding:11px 0;border:1px solid var(--line);border-radius:10px;color:var(--muted)}
+.nums button.on{background:var(--accent);border-color:var(--accent);color:#15111F;font-weight:700}
+.score{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.score div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
+.score b{font-family:var(--serif);font-size:20px}
+.res{display:flex;gap:12px;align-items:center;width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;margin-top:8px}
+.res .poster{width:44px;aspect-ratio:2/3;padding:0;flex:none}
+nav{position:fixed;left:0;right:0;bottom:0;background:rgba(21,17,31,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:10}
+nav div{max-width:880px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
+nav button{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:13px;padding:6px 18px;border-radius:12px}
+nav button.on{color:var(--accent)}
+nav .add{background:var(--accent);color:#15111F;width:52px;height:52px;border-radius:50%;justify-content:center;font-size:28px;font-weight:500;margin-top:-18px;padding:0}
+nav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+#toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-80px);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 18px;z-index:20;transition:transform .25s}
+#toast.show{transform:translate(-50%,0)} #toast.err{border-color:var(--danger)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"><main id="view"></main></div>
+<nav aria-label="Navigasi utama"><div>
+<button data-act="go" data-v="home" id="n-home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/></svg>Home</button>
+<button data-act="go" data-v="bank" id="n-bank"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="16" rx="1"/><rect x="14" y="4" width="7" height="16" rx="1"/></svg>Bank</button>
+<button data-act="go" data-v="add" class="add" id="n-add" aria-label="Tambah film">+</button>
+<button data-act="go" data-v="archive" id="n-archive"><svg viewBox="0 0 24 24"><path d="M5 4h14v16l-7-4-7 4z"/></svg>Arsip</button>
+</div></nav>
+<div id="toast" role="status"></div>
+
+<script>
+/* DATA CONTOH: semua in-memory. Di versi asli: Supabase (movies, moods, movie_moods, watch_logs). */
+const MOODS=["Psikologis","Emosional","Romantis","Coming of Age","Gelap","Intens","Reflektif"];
+let movies=[
+ {id:1,tmdb:37165,title:"The Truman Show",year:1998,runtime:103,moods:["Reflektif","Coming of Age"],syn:"Seorang agen asuransi mulai curiga bahwa seluruh hidupnya ternyata acara televisi.",url:"https://example.com/truman",done:false},
+ {id:2,tmdb:10494,title:"Perfect Blue",year:1997,runtime:81,moods:["Psikologis","Gelap"],syn:"Penyanyi pop yang beralih jadi aktris mulai kehilangan batas antara dirinya dan peran.",url:"",done:false},
+ {id:3,tmdb:152601,title:"Her",year:2013,runtime:126,moods:["Romantis","Emosional"],syn:"Penulis yang kesepian jatuh cinta pada sistem operasi yang bisa diajak bicara.",url:"https://example.com/her",done:false},
+ {id:4,tmdb:157336,title:"Interstellar",year:2014,runtime:169,moods:["Emosional"],syn:"Ayah dan mantan pilot dikirim mencari planet baru untuk manusia.",url:"",done:false},
+ {id:5,tmdb:244786,title:"Whiplash",year:2014,runtime:106,moods:["Intens"],syn:"Drummer muda ditempa habis-habisan oleh pengajar konservatori yang kejam.",url:"https://example.com/whiplash",done:true,r:9,p:8,theme:"Obsesi vs harga dari kejar sempurna",scene:"Adegan latihan sampai tangan berdarah",angle:"Kapan dedikasi berubah jadi pengorbanan yang nggak sehat?",notes:"Cocok dibedah jadi video 60 detik soal ambisi."}
+];
+const CATALOG=[
+ {tmdb:496243,title:"Parasite",year:2019,runtime:132,syn:"Keluarga miskin menyusup ke kehidupan keluarga kaya, dan semuanya mulai tak terkendali."},
+ {tmdb:666277,title:"Past Lives",year:2023,runtime:106,syn:"Dua teman masa kecil bertemu lagi puluhan tahun kemudian dan menimbang jalan yang tak jadi diambil."},
+ {tmdb:38,title:"Eternal Sunshine of the Spotless Mind",year:2004,runtime:108,syn:"Pasangan yang patah hati memutuskan menghapus ingatan satu sama lain."},
+ {tmdb:153,title:"Lost in Translation",year:2003,runtime:102,syn:"Dua orang asing yang sama-sama tersesat bertemu di sebuah hotel di Tokyo."},
+ {tmdb:129,title:"Spirited Away",year:2001,runtime:125,syn:"Anak perempuan terjebak di dunia roh dan harus bekerja untuk menyelamatkan orang tuanya."},
+ {tmdb:76,title:"Before Sunrise",year:1995,runtime:101,syn:"Dua orang asing ngobrol sepanjang malam di Wina sebelum berpisah."}
+];
+const s={view:"home",id:null,hm:new Set(),picks:[],bm:new Set(),st:"all",sort:"new",q:"",del:false,
+ af:{r:null,p:null,theme:"",scene:"",angle:"",notes:""},ad:{q:"",sel:null,moods:new Set(),url:""}};
+
+const $=q=>document.querySelector(q);
+const esc=t=>String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl=u=>/^https?:\/\/\S+$/i.test(u||"");
+const get=id=>movies.find(m=>m.id===id);
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const anyMood=(m,set)=>!set.size||m.moods.some(x=>set.has(x));
+let tt;function toast(msg,err){const t=$("#toast");t.textContent=msg;t.className="show"+(err?" err":"");clearTimeout(tt);tt=setTimeout(()=>t.className="",2600)}
+
+function poster(m,big){const h=((m.tmdb||m.id)*47)%360;return `<div class="poster${big?" big":""}" style="--h:${h}"><span>${esc(m.title)}</span>${m.done&&!big?`<i class="tag">Sudah</i>`:""}</div>`}
+function card(m){return `<button class="card" data-act="open" data-id="${m.id}">${poster(m)}<div class="t">${esc(m.title)}</div><div class="m">${m.year}, ${esc(m.moods[0])}${m.moods.length>1?" +"+(m.moods.length-1):""}</div></button>`}
+function chips(set,act){return MOODS.map(x=>`<button class="chip${set.has(x)?" on":""}" data-act="${act}" data-m="${esc(x)}" aria-pressed="${set.has(x)}">${esc(x)}</button>`).join("")}
+function pick(){s.picks=shuffle(movies.filter(m=>!m.done&&anyMood(m,s.hm))).slice(0,3)}
+
+/* ---------- views ---------- */
+const V={};
+V.home=()=>{
+ const empty=!movies.length?`<div class="empty"><p class="serif">Kabin masih kosong.</p><p class="muted">Simpan film pertama lu, nanti muncul di sini.</p><button class="btn primary" data-act="go" data-v="add">Simpan film</button></div>`
+ :`<div class="empty"><p class="serif">Nggak ada film ${s.hm.size?"dengan mood itu":""} yang belum ditonton.</p><p class="muted">Coba mood lain, atau tambah film baru.</p><button class="btn" data-act="go" data-v="add">Tambah film</button></div>`;
+ return `<h1>Mau nonton apa malam ini?</h1><p class="muted">Pilih mood, atau langsung acak dari yang belum ditonton.</p>
+ <div class="chips sec" style="margin-top:18px">${chips(s.hm,"hmood")}</div>
+ <div class="row sec" style="margin-top:20px"><h2>Pilihan malam ini</h2><button class="link" data-act="shuffle">Acak lagi</button></div>
+ ${s.picks.length?`<div class="grid">${s.picks.map(card).join("")}</div>`:empty}`};
+
+V.bank=()=>`<div class="row"><div><h1>Movie Bank</h1><p class="muted">${movies.length} film tersimpan</p></div></div>
+ <input type="text" id="q" placeholder="Cari judul" value="${esc(s.q)}" aria-label="Cari judul" style="margin-top:16px">
+ <div class="chips" style="margin-top:10px">${chips(s.bm,"bmood")}</div>
+ <div class="row" style="margin-top:8px"><div class="chips">${[["all","Semua"],["no","Belum ditonton"],["yes","Sudah ditonton"]].map(([k,l])=>`<button class="chip${s.st===k?" on":""}" data-act="status" data-k="${k}">${l}</button>`).join("")}</div>
+ <select id="sort" aria-label="Urutkan" style="width:auto"><option value="new"${s.sort==="new"?" selected":""}>Terbaru</option><option value="title"${s.sort==="title"?" selected":""}>Judul A-Z</option><option value="pot"${s.sort==="pot"?" selected":""}>Potensi tertinggi</option></select></div>
+ <div id="grid"></div>`;
+function bankGrid(){
+ let l=movies.filter(m=>anyMood(m,s.bm)&&(s.st==="all"||(s.st==="yes")===m.done)&&m.title.toLowerCase().includes(s.q.trim().toLowerCase()));
+ if(s.sort==="title")l.sort((a,b)=>a.title.localeCompare(b.title));
+ if(s.sort==="pot")l.sort((a,b)=>(b.p||0)-(a.p||0));
+ if(s.sort==="new")l.sort((a,b)=>b.id-a.id);
+ $("#grid").innerHTML=l.length?`<div class="grid bank">${l.map(card).join("")}</div>`:`<div class="empty"><p class="serif">Nggak ada yang cocok.</p><p class="muted">Ubah kata kunci atau lepas filter.</p><button class="btn" data-act="reset">Lepas semua filter</button></div>`}
+
+V.archive=()=>{
+ const l=movies.filter(m=>m.done).sort((a,b)=>b.p-a.p);
+ return `<h1>Arsip</h1><p class="muted">Film yang sudah ditonton, diurutkan dari potensi konten tertinggi.</p>`+
+ (l.length?l.map(m=>`<button class="panel card" data-act="open" data-id="${m.id}" style="display:flex;gap:14px"><div style="width:64px;flex:none">${poster(m)}</div><div><div class="t serif" style="font-size:18px">${esc(m.title)}</div>
+  <div class="score"><div>Rating <b>${m.r}</b>/10</div><div>Potensi <b style="color:var(--accent)">${m.p}</b>/10</div></div>
+  ${m.angle?`<p class="muted" style="margin-top:8px">${esc(m.angle)}</p>`:""}</div></button>`).join("")
+ :`<div class="empty"><p class="serif">Belum ada catatan.</p><p class="muted">Setelah selesai nonton, catat ide dan angle-nya di sini.</p><button class="btn" data-act="go" data-v="bank">Buka Movie Bank</button></div>`)};
+
+V.detail=()=>{const m=get(s.id);if(!m)return V.bank();
+ return `<button class="link" data-act="go" data-v="bank">Kembali ke Bank</button>
+ <div class="detail"><div>${poster(m,true)}</div><div>
+ <h1>${esc(m.title)}</h1><p class="muted">${m.year}, ${m.runtime} menit. ${m.done?"Sudah ditonton":"Belum ditonton"}.</p>
+ <p class="muted" style="margin-top:14px">Mood (ketuk untuk ubah)</p><div class="chips" style="flex-wrap:wrap">${chips(new Set(m.moods),"dmood")}</div>
+ <p style="margin-top:12px">${esc(m.syn)}</p>
+ ${m.done?`<div class="panel"><h3>Catatan Creator Archive</h3><div class="score"><div>Rating <b>${m.r}</b>/10</div><div>Potensi konten <b style="color:var(--accent)">${m.p}</b>/10</div></div>
+  ${[["Tema",m.theme],["Adegan yang nempel",m.scene],["Angle konten",m.angle],["Catatan",m.notes]].filter(x=>x[1]).map(x=>`<p style="margin-top:10px"><span class="muted">${x[0]}</span><br>${esc(x[1])}</p>`).join("")}</div>`:""}
+ <div class="row sec" style="justify-content:flex-start;flex-wrap:wrap;margin-top:22px">
+ ${safeUrl(m.url)?`<a class="btn primary" href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">Tonton</a>`:`<button class="btn" disabled>Belum ada tautan tonton</button>`}
+ <button class="btn" data-act="after" data-id="${m.id}">${m.done?"Edit catatan":"Udah kelar nonton"}</button>
+ ${s.del?`<span class="muted">Hapus film dan catatannya?</span><button class="btn danger" data-act="delyes">Ya, hapus</button><button class="btn" data-act="delno">Batal</button>`:`<button class="btn danger" data-act="del">Hapus</button>`}
+ </div></div></div>`};
+
+V.after=()=>{const m=get(s.id),a=s.af;
+ const nums=k=>`<div class="nums">${[...Array(10)].map((_,i)=>`<button data-act="num" data-k="${k}" data-v="${i+1}" class="${a[k]===i+1?"on":""}" aria-label="${i+1}">${i+1}</button>`).join("")}</div>`;
+ const f=(k,l,ph)=>`<label for="f-${k}">${l}</label><input type="text" id="f-${k}" data-f="${k}" placeholder="${ph}" value="${esc(a[k])}">`;
+ return `<button class="link" data-act="open" data-id="${m.id}">Batal</button><h1 style="margin-top:12px">${esc(m.title)}</h1><p class="muted">Catat sebelum kesannya hilang.</p>
+ <div class="panel"><label style="margin-top:0">Rating filmnya <span class="muted">(1 jelek, 10 mahakarya)</span></label>${nums("r")}
+ <label>Potensi jadi konten <span class="muted">(1 susah diolah, 10 siap dibedah)</span></label>${nums("p")}
+ ${f("theme","Tema","Misal: obsesi, kehilangan, mencari makna")}${f("scene","Adegan yang nempel","Adegan mana yang masih kebayang?")}${f("angle","Angle konten","Pertanyaan atau sudut pandang untuk videonya")}
+ <label for="f-notes">Catatan bebas</label><textarea id="f-notes" data-f="notes">${esc(a.notes)}</textarea></div>
+ <button class="btn primary" data-act="savelog" style="width:100%;margin-top:16px">Simpan catatan</button>`};
+
+V.add=()=>{const d=s.ad,q=d.q.trim().toLowerCase(),sel=d.sel;
+ const res=q.length>=2?CATALOG.filter(c=>c.title.toLowerCase().includes(q)):[];
+ return `<h1>Tambah film</h1><p class="muted">Cari judulnya, cek hasilnya, lalu pilih mood.</p>
+ <input type="text" id="aq" placeholder="Ketik judul film" value="${esc(d.q)}" aria-label="Cari judul film" style="margin-top:16px">
+ <p class="muted" style="margin-top:6px">Contoh hasil pencarian (data simulasi, nanti dari TMDB).</p>
+ <div id="res">${res.map((c,i)=>`<button class="res" data-act="pickres" data-i="${CATALOG.indexOf(c)}"><div>${poster({title:"",tmdb:c.tmdb})}</div><div><b>${esc(c.title)}</b><div class="muted">${c.year}, ${c.runtime} menit</div></div></button>`).join("")}
+ ${q.length>=2&&!res.length?`<div class="empty"><p>Nggak ketemu "${esc(d.q)}".</p><button class="btn" data-act="manual">Isi manual</button></div>`:""}</div>
+ ${!sel?`<p style="margin-top:14px"><button class="link" data-act="manual">Film nggak ada di hasil? Isi manual</button></p>`:`
+ <div class="panel"><div class="row" style="align-items:flex-start"><div style="width:96px;flex:none">${poster(sel)}</div>
+ <div style="flex:1">${sel.manual?`<input type="text" data-g="title" placeholder="Judul" value="${esc(sel.title)}" aria-label="Judul"><input type="text" data-g="year" placeholder="Tahun" value="${esc(sel.year)}" aria-label="Tahun" style="margin-top:8px"><input type="text" data-g="syn" placeholder="Sinopsis singkat" value="${esc(sel.syn)}" aria-label="Sinopsis" style="margin-top:8px">`
+ :`<h3>${esc(sel.title)}</h3><p class="muted">${sel.year}, ${sel.runtime} menit</p><p style="margin-top:8px">${esc(sel.syn)}</p>`}</div></div></div>
+ <label>Mood <span class="muted">(pilih satu atau lebih)</span></label><div class="chips" style="flex-wrap:wrap">${chips(d.moods,"amood")}</div>
+ <label for="au">Tautan nonton <span class="muted">(opsional)</span></label><input type="text" id="au" data-g="url" placeholder="https://..." value="${esc(d.url)}">
+ <button class="btn primary" data-act="save" style="width:100%;margin-top:18px">Simpan ke Kabin</button>`}`};
+
+/* ---------- render & actions ---------- */
+function render(){
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
+ const nv={home:"home",bank:"bank",detail:"bank",after:"bank",archive:"archive",add:"add"}[s.view];
+ $("#n-"+nv)?.classList.add("on");
+ $("#view").innerHTML=V[s.view]();
+ if(s.view==="bank")bankGrid();
+}
+function go(v,id){s.view=v;if(id)s.id=id;s.del=false;if(v==="home")pick();if(v==="add")s.ad={q:"",sel:null,moods:new Set(),url:""};render();scrollTo(0,0)}
+const tog=(set,m)=>set.has(m)?set.delete(m):set.add(m);
+
+const A={
+ go:t=>go(t.dataset.v),
+ open:t=>go("detail",+t.dataset.id),
+ hmood:t=>{tog(s.hm,t.dataset.m);pick();render()},
+ shuffle:()=>{pick();render()},
+ bmood:t=>{tog(s.bm,t.dataset.m);render()},
+ status:t=>{s.st=t.dataset.k;render()},
+ reset:()=>{s.bm.clear();s.st="all";s.q="";render()},
+ dmood:t=>{const m=get(s.id),x=t.dataset.m,i=m.moods.indexOf(x);
+  if(i>=0){if(m.moods.length===1)return toast("Minimal satu mood.",1);m.moods.splice(i,1)}else m.moods.push(x);render()},
+ del:()=>{s.del=true;render()}, delno:()=>{s.del=false;render()},
+ delyes:()=>{const m=get(s.id);movies=movies.filter(x=>x.id!==s.id);toast(`"${m.title}" dihapus dari Kabin.`);go("bank")},
+ after:t=>{const m=get(+t.dataset.id);s.id=m.id;s.af={r:m.r||null,p:m.p||null,theme:m.theme||"",scene:m.scene||"",angle:m.angle||"",notes:m.notes||""};s.view="after";render();scrollTo(0,0)},
+ num:t=>{s.af[t.dataset.k]=+t.dataset.v;render()},
+ savelog:()=>{const a=s.af;if(!a.r||!a.p)return toast("Isi rating dan potensi konten dulu.",1);
+  Object.assign(get(s.id),{done:true,r:a.r,p:a.p,theme:a.theme.trim(),scene:a.scene.trim(),angle:a.angle.trim(),notes:a.notes.trim()});toast("Catatan tersimpan.");go("detail",s.id)},
+ pickres:t=>{const c=CATALOG[+t.dataset.i];s.ad.sel={...c};render()},
+ manual:()=>{s.ad.sel={manual:true,title:s.ad.q,year:"",runtime:"",syn:""};render()},
+ amood:t=>{tog(s.ad.moods,t.dataset.m);render()},
+ save:()=>{const d=s.ad,m=d.sel;
+  if(!m.title.trim())return toast("Judul wajib diisi.",1);
+  if(!d.moods.size)return toast("Pilih minimal satu mood.",1);
+  if(d.url.trim()&&!safeUrl(d.url.trim()))return toast("Tautan harus diawali http:// atau https://",1);
+  if(movies.some(x=>(m.tmdb&&x.tmdb===m.tmdb)||(x.title.toLowerCase()===m.title.trim().toLowerCase()&&String(x.year)===String(m.year))))return toast("Film ini sudah ada di Kabin.",1);
+  const n={id:Date.now(),tmdb:m.tmdb||null,title:m.title.trim(),year:m.year||"?",runtime:m.runtime||"?",moods:[...d.moods],syn:m.syn||"",url:d.url.trim(),done:false};
+  movies.unshift(n);toast(`"${n.title}" masuk ke Kabin.`);go("detail",n.id)}
+};
+document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(t&&A[t.dataset.act])A[t.dataset.act](t)});
+document.addEventListener("input",e=>{const t=e.target;
+ if(t.id==="q"){s.q=t.value;bankGrid()}
+ else if(t.id==="aq"){s.ad.q=t.value;const c=t.selectionStart;render();const n=$("#aq");n.focus();n.setSelectionRange(c,c)}
+ else if(t.dataset.f)s.af[t.dataset.f]=t.value;
+ else if(t.dataset.g){t.dataset.g==="url"?s.ad.url=t.value:s.ad.sel[t.dataset.g]=t.value}});
+document.addEventListener("change",e=>{if(e.target.id==="sort"){s.sort=e.target.value;bankGrid()}});
+pick();render();
+</script>
+</body>
+</html>
