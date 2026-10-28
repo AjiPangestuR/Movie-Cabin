@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useMovies } from '@/lib/useMovies';
-import { StatusFilter, SortOption } from '@/types';
+import { Movie, StatusFilter, SortOption } from '@/types';
 import { MoodChips } from '@/components/MoodChips';
 import { MovieCard } from '@/components/MovieCard';
 import { EmptyState } from '@/components/EmptyState';
@@ -13,8 +12,15 @@ const STATUS_OPTIONS: { key: StatusFilter; label: string }[] = [
   { key: 'yes', label: 'Sudah ditonton' },
 ];
 
-export function BankView() {
-  const { movies, loading } = useMovies();
+interface BankViewProps {
+  initialMovies?: Movie[];
+  initialMoods?: string[];
+}
+
+export function BankView({ initialMovies = [], initialMoods = [] }: BankViewProps) {
+  const [movies] = useState<Movie[]>(initialMovies);
+  const [availableMoods] = useState<string[]>(initialMoods);
+
   const [search, setSearch] = useState('');
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [status, setStatus] = useState<StatusFilter>('all');
@@ -36,7 +42,7 @@ export function BankView() {
     const q = search.trim().toLowerCase();
 
     const filtered = movies.filter((m) => {
-      // Mood match: if no mood selected, matches all
+      // Mood match
       const matchMood =
         selectedMoods.length === 0 || m.moods.some((mood) => selectedMoods.includes(mood));
 
@@ -60,25 +66,12 @@ export function BankView() {
         const pB = b.log?.contentPotential || 0;
         return pB - pA;
       }
-      // 'new'
-      return b.id - a.id;
+      // 'new': already ordered by created_at desc from database
+      return 0;
     });
 
     return filtered;
   }, [movies, search, selectedMoods, status, sort]);
-
-  if (loading) {
-    return (
-      <div>
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1>Movie Bank</h1>
-            <p className="muted">Memuat film tersimpan...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -101,13 +94,16 @@ export function BankView() {
         className="mt-4"
       />
 
-      {/* Mood Filters */}
-      <div className="mt-2.5">
-        <MoodChips
-          selectedMoods={selectedMoods}
-          onToggle={handleToggleMood}
-        />
-      </div>
+      {/* Mood Filters dari database */}
+      {availableMoods.length > 0 && (
+        <div className="mt-2.5">
+          <MoodChips
+            moods={availableMoods}
+            selectedMoods={selectedMoods}
+            onToggle={handleToggleMood}
+          />
+        </div>
+      )}
 
       {/* Status Chips and Sort Filter */}
       <div className="flex items-center justify-between gap-3 flex-wrap mt-2">

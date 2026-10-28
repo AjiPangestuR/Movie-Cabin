@@ -2,10 +2,25 @@ import React from 'react';
 
 interface PosterCoverProps {
   title: string;
-  identifier?: number | null;
+  identifier?: string | number | null;
   done?: boolean;
   big?: boolean;
   className?: string;
+}
+
+function calculateHue(identifier?: string | number | null): number {
+  if (typeof identifier === 'number' && !isNaN(identifier)) {
+    return (identifier * 47) % 360;
+  }
+  if (typeof identifier === 'string' && identifier.length > 0) {
+    let hash = 0;
+    for (let i = 0; i < identifier.length; i++) {
+      hash = (hash << 5) - hash + identifier.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash) % 360;
+  }
+  return 180;
 }
 
 export function PosterCover({
@@ -15,8 +30,7 @@ export function PosterCover({
   big = false,
   className = '',
 }: PosterCoverProps) {
-  const numericId = identifier || 1;
-  const h = (numericId * 47) % 360;
+  const h = calculateHue(identifier);
   const h2 = (h + 45) % 360;
 
   return (

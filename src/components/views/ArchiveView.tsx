@@ -1,13 +1,18 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useMovies } from '@/lib/useMovies';
+import { Movie } from '@/types';
+import { signOutAction } from '@/app/auth/actions';
 import { PosterCover } from '@/components/PosterCover';
 import { EmptyState } from '@/components/EmptyState';
 
-export function ArchiveView() {
-  const { movies, loading } = useMovies();
+interface ArchiveViewProps {
+  initialMovies?: Movie[];
+}
+
+export function ArchiveView({ initialMovies = [] }: ArchiveViewProps) {
+  const [movies] = useState<Movie[]>(initialMovies);
 
   const archivedMovies = useMemo(() => {
     return movies
@@ -15,22 +20,27 @@ export function ArchiveView() {
       .sort((a, b) => (b.log?.contentPotential || 0) - (a.log?.contentPotential || 0));
   }, [movies]);
 
-  if (loading) {
-    return (
-      <div>
-        <h1>Arsip</h1>
-        <p className="muted">Memuat arsip film...</p>
-      </div>
-    );
-  }
-
   return (
     <div>
-      <h1>Arsip</h1>
-      <p className="muted">Film yang sudah ditonton, diurutkan dari potensi konten tertinggi.</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1>Arsip</h1>
+          <p className="muted">Film yang sudah ditonton, diurutkan dari potensi konten tertinggi.</p>
+        </div>
+
+        {/* Sign out form POST di pojok kanan atas halaman Arsip */}
+        <form action={signOutAction} className="flex-none pt-1">
+          <button
+            type="submit"
+            className="px-3 py-1.5 rounded-lg border border-line bg-surface text-xs font-medium text-muted hover:text-danger hover:border-danger/40 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            Keluar
+          </button>
+        </form>
+      </div>
 
       {archivedMovies.length > 0 ? (
-        <div className="space-y-4 mt-4">
+        <div className="space-y-4 mt-6">
           {archivedMovies.map((movie) => (
             <Link
               key={movie.id}

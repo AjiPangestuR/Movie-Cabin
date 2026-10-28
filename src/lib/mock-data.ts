@@ -12,7 +12,7 @@ export const MOODS: string[] = [
 
 export const INITIAL_MOVIES: Movie[] = [
   {
-    id: 1,
+    id: '00000000-0000-0000-0000-000000000001',
     tmdbId: 37165,
     title: 'The Truman Show',
     year: 1998,
@@ -23,7 +23,7 @@ export const INITIAL_MOVIES: Movie[] = [
     done: false,
   },
   {
-    id: 2,
+    id: '00000000-0000-0000-0000-000000000002',
     tmdbId: 10494,
     title: 'Perfect Blue',
     year: 1997,
@@ -34,7 +34,7 @@ export const INITIAL_MOVIES: Movie[] = [
     done: false,
   },
   {
-    id: 3,
+    id: '00000000-0000-0000-0000-000000000003',
     tmdbId: 152601,
     title: 'Her',
     year: 2013,
@@ -45,7 +45,7 @@ export const INITIAL_MOVIES: Movie[] = [
     done: false,
   },
   {
-    id: 4,
+    id: '00000000-0000-0000-0000-000000000004',
     tmdbId: 157336,
     title: 'Interstellar',
     year: 2014,
@@ -56,7 +56,7 @@ export const INITIAL_MOVIES: Movie[] = [
     done: false,
   },
   {
-    id: 5,
+    id: '00000000-0000-0000-0000-000000000005',
     tmdbId: 244786,
     title: 'Whiplash',
     year: 2014,

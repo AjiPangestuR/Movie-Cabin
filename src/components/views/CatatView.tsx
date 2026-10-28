@@ -4,18 +4,18 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Movie } from '@/types';
-import { useMovies } from '@/lib/useMovies';
 import { saveLog } from '@/lib/movies';
 import { NumberScale } from '@/components/NumberScale';
 import { useToast } from '@/components/Toast';
 
 interface CatatViewProps {
-  id: number;
+  movie: Movie;
 }
 
-function CatatForm({ movie }: { movie: Movie }) {
+export function CatatView({ movie }: CatatViewProps) {
   const router = useRouter();
   const { showToast } = useToast();
+  const [submitting, setSubmitting] = useState(false);
 
   const [rating, setRating] = useState<number | null>(movie.log?.rating ?? null);
   const [contentPotential, setContentPotential] = useState<number | null>(
@@ -34,6 +34,7 @@ function CatatForm({ movie }: { movie: Movie }) {
       return;
     }
 
+    setSubmitting(true);
     try {
       await saveLog(movie.id, {
         rating,
@@ -46,9 +47,12 @@ function CatatForm({ movie }: { movie: Movie }) {
 
       showToast('Catatan tersimpan.');
       router.push(`/bank/${movie.id}`);
+      router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Gagal menyimpan catatan.';
       showToast(msg, true);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -120,34 +124,12 @@ function CatatForm({ movie }: { movie: Movie }) {
 
         <button
           type="submit"
+          disabled={submitting}
           className="btn primary w-full mt-4"
         >
-          Simpan catatan
+          {submitting ? 'Menyimpan...' : 'Simpan catatan'}
         </button>
       </form>
     </div>
   );
-}
-
-export function CatatView({ id }: CatatViewProps) {
-  const { movies } = useMovies();
-  const movie = movies.find((m) => m.id === id);
-
-  if (!movie) {
-    return (
-      <div>
-        <Link href="/bank" className="link font-medium">
-          Kembali ke Bank
-        </Link>
-        <div className="mt-8 text-center">
-          <p className="font-serif font-bold text-lg mb-2">Film tidak ditemukan.</p>
-          <Link href="/bank" className="btn mt-4">
-            Buka Movie Bank
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  return <CatatForm movie={movie} />;
 }

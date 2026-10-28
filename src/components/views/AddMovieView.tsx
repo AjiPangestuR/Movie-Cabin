@@ -4,8 +4,9 @@ import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CATALOG } from '@/lib/mock-data';
 import { addMovie } from '@/lib/movies';
-import { PosterCover } from '@/components/PosterCover';
+import { createCustomMood } from '@/lib/moods';
 import { MoodChips } from '@/components/MoodChips';
+import { PosterCover } from '@/components/PosterCover';
 import { useToast } from '@/components/Toast';
 
 interface SelectedMovieState {
@@ -17,14 +18,24 @@ interface SelectedMovieState {
   syn: string;
 }
 
-export function AddMovieView() {
+interface AddMovieViewProps {
+  initialMoods?: string[];
+}
+
+export function AddMovieView({ initialMoods = [] }: AddMovieViewProps) {
   const router = useRouter();
   const { showToast } = useToast();
 
   const [query, setQuery] = useState('');
   const [selectedMovie, setSelectedMovie] = useState<SelectedMovieState | null>(null);
+  const [availableMoods, setAvailableMoods] = useState<string[]>(initialMoods);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [watchUrl, setWatchUrl] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Custom mood state
+  const [newMoodName, setNewMoodName] = useState('');
+  const [isAddingMood, setIsAddingMood] = useState(false);
 
   const trimmedQuery = query.trim().toLowerCase();
 
@@ -60,6 +71,30 @@ export function AddMovieView() {
     );
   };
 
+  const handleAddCustomMood = async () => {
+    const name = newMoodName.trim();
+    if (!name) return;
+
+    if (name.length > 24) {
+      showToast('Nama mood maksimal 24 karakter.', true);
+      return;
+    }
+
+    setIsAddingMood(true);
+    try {
+      const created = await createCustomMood(name);
+      setAvailableMoods((prev) => [...prev, created.name]);
+      setSelectedMoods((prev) => [...prev, created.name]);
+      setNewMoodName('');
+      showToast(`Mood "${created.name}" berhasil ditambahkan.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Gagal menambahkan mood baru.';
+      showToast(msg, true);
+    } finally {
+      setIsAddingMood(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -81,6 +116,7 @@ export function AddMovieView() {
       return;
     }
 
+    setSaving(true);
     try {
       const newMovie = await addMovie({
         tmdbId: selectedMovie.tmdb ?? null,
@@ -94,9 +130,12 @@ export function AddMovieView() {
 
       showToast(`"${newMovie.title}" masuk ke Kabin.`);
       router.push(`/bank/${newMovie.id}`);
+      router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Gagal menyimpan film.';
       showToast(msg, true);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -243,10 +282,31 @@ export function AddMovieView() {
           </label>
           <div className="mt-1">
             <MoodChips
+              moods={availableMoods}
               selectedMoods={selectedMoods}
               onToggle={handleToggleMood}
               wrap
             />
+          </div>
+
+          {/* Input Mood Kustom Baru */}
+          <div className="mt-3 flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="+ Mood kustom (1-24 karakter)"
+              value={newMoodName}
+              onChange={(e) => setNewMoodName(e.target.value)}
+              maxLength={24}
+              className="!w-auto flex-1 max-w-[260px] text-xs py-2 px-3 rounded-xl border border-line bg-surface"
+            />
+            <button
+              type="button"
+              onClick={handleAddCustomMood}
+              disabled={isAddingMood || !newMoodName.trim()}
+              className="btn text-xs py-2 px-3.5"
+            >
+              {isAddingMood ? 'Menambahkan...' : 'Tambah Mood'}
+            </button>
           </div>
 
           {/* Watch URL */}
@@ -263,9 +323,10 @@ export function AddMovieView() {
 
           <button
             type="submit"
+            disabled={saving}
             className="btn primary w-full mt-[18px]"
           >
-            Simpan ke Kabin
+            {saving ? 'Menyimpan ke Kabin...' : 'Simpan ke Kabin'}
           </button>
         </form>
       )}

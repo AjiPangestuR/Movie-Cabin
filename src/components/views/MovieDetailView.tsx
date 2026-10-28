@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMovies } from '@/lib/useMovies';
+import { Movie } from '@/types';
 import { updateMovieMoods, deleteMovie } from '@/lib/movies';
 import { PosterCover } from '@/components/PosterCover';
 import { MoodChips } from '@/components/MoodChips';
@@ -11,33 +11,17 @@ import { ConfirmInline } from '@/components/ConfirmInline';
 import { useToast } from '@/components/Toast';
 
 interface MovieDetailViewProps {
-  id: number;
+  initialMovie: Movie;
+  initialMoods?: string[];
 }
 
-export function MovieDetailView({ id }: MovieDetailViewProps) {
+export function MovieDetailView({ initialMovie, initialMoods = [] }: MovieDetailViewProps) {
   const router = useRouter();
   const { showToast } = useToast();
-  const { movies } = useMovies();
+
+  const [movie, setMovie] = useState<Movie>(initialMovie);
+  const [availableMoods] = useState<string[]>(initialMoods);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const movie = movies.find((m) => m.id === id);
-
-  if (!movie) {
-    return (
-      <div>
-        <Link href="/bank" className="link font-medium">
-          Kembali ke Bank
-        </Link>
-        <div className="mt-8 text-center">
-          <p className="font-serif font-bold text-lg mb-2">Film tidak ditemukan.</p>
-          <p className="text-muted text-sm mb-4">Film dengan ID ini tidak ada di koleksi Kabin.</p>
-          <Link href="/bank" className="btn">
-            Buka Movie Bank
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   const handleToggleMood = async (mood: string) => {
     const isExisting = movie.moods.includes(mood);
@@ -51,7 +35,8 @@ export function MovieDetailView({ id }: MovieDetailViewProps) {
       : [...movie.moods, mood];
 
     try {
-      await updateMovieMoods(movie.id, nextMoods);
+      const updated = await updateMovieMoods(movie.id, nextMoods);
+      setMovie(updated);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Gagal memperbarui mood.';
       showToast(msg, true);
@@ -109,6 +94,7 @@ export function MovieDetailView({ id }: MovieDetailViewProps) {
           <p className="muted mt-3.5">Mood (ketuk untuk ubah)</p>
           <div className="mt-1">
             <MoodChips
+              moods={availableMoods.length > 0 ? availableMoods : movie.moods}
               selectedMoods={movie.moods}
               onToggle={handleToggleMood}
               wrap

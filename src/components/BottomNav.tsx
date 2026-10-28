@@ -7,6 +7,11 @@ import { usePathname } from 'next/navigation';
 export function BottomNav() {
   const pathname = usePathname();
 
+  // Jangan tampilkan navigasi bawah pada halaman login
+  if (pathname === '/login') {
+    return null;
+  }
+
   const isHome = pathname === '/';
   const isBank = pathname.startsWith('/bank');
   const isAdd = pathname === '/add';

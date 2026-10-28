@@ -8,7 +8,7 @@ export interface WatchLog {
 }
 
 export interface Movie {
-  id: number;
+  id: string; // UUID from PostgreSQL
   tmdbId: number | null;
   title: string;
   year: number | string;
@@ -18,6 +18,12 @@ export interface Movie {
   watchUrl: string;
   done: boolean;
   log?: WatchLog;
+}
+
+export interface Mood {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 export interface CatalogMovie {

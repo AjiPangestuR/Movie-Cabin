@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useMovies } from '@/lib/useMovies';
 import { Movie } from '@/types';
 import { MoodChips } from '@/components/MoodChips';
 import { MovieCard } from '@/components/MovieCard';
@@ -16,8 +15,14 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-export function HomeView() {
-  const { movies, loading } = useMovies();
+interface HomeViewProps {
+  initialMovies?: Movie[];
+  initialMoods?: string[];
+}
+
+export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProps) {
+  const [movies] = useState<Movie[]>(initialMovies);
+  const [availableMoods] = useState<string[]>(initialMoods);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [shuffleKey, setShuffleKey] = useState(0);
 
@@ -42,20 +47,9 @@ export function HomeView() {
   }, [movies, selectedMoods]);
 
   const picks: Movie[] = useMemo(() => {
-    // shuffleKey dependency triggers a new shuffle
     if (shuffleKey < 0) return [];
     return shuffleArray(unwatchedCandidates).slice(0, 3);
   }, [unwatchedCandidates, shuffleKey]);
-
-  if (loading) {
-    return (
-      <div>
-        <h1>Mau nonton apa malam ini?</h1>
-        <p className="muted">Pilih mood, atau langsung acak dari yang belum ditonton.</p>
-        <div className="mt-8 text-center text-muted text-sm">Memuat koleksi film...</div>
-      </div>
-    );
-  }
 
   const hasMoodFilter = selectedMoods.length > 0;
 
@@ -64,13 +58,16 @@ export function HomeView() {
       <h1>Mau nonton apa malam ini?</h1>
       <p className="muted">Pilih mood, atau langsung acak dari yang belum ditonton.</p>
 
-      {/* Mood filter chips */}
-      <div className="mt-[18px]">
-        <MoodChips
-          selectedMoods={selectedMoods}
-          onToggle={handleToggleMood}
-        />
-      </div>
+      {/* Mood filter chips dari database */}
+      {availableMoods.length > 0 && (
+        <div className="mt-[18px]">
+          <MoodChips
+            moods={availableMoods}
+            selectedMoods={selectedMoods}
+            onToggle={handleToggleMood}
+          />
+        </div>
+      )}
 
       {/* Section Header */}
       <div className="flex items-center justify-between gap-3 mt-5">
@@ -78,7 +75,7 @@ export function HomeView() {
         <button
           type="button"
           onClick={handleShuffle}
-          className="link font-medium"
+          className="link font-medium cursor-pointer"
         >
           Acak lagi
         </button>
