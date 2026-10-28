@@ -6,66 +6,38 @@ Dokumen ini menjelaskan langkah-langkah menjalankan migrasi skema database dan m
 
 ## 1. Menjalankan Migrasi Database
 
-File migrasi utama berada di:
-`supabase/migrations/20261028000000_phase2_init_schema.sql`
+Terdapat 2 file migrasi yang wajib dijalankan secara berurutan:
+1. `supabase/migrations/20261028000000_phase2_init_schema.sql` (Skema utama, tabel, RLS, constraint, trigger, RPC)
+2. `supabase/migrations/20261028000001_phase2_security_patch.sql` (Patch keamanan: handle_updated_at SECURITY INVOKER & revoke all tables from anon)
 
-Pilih salah satu metode berikut:
-
-### Opsi A: Lewat Supabase Dashboard (SQL Editor) — Paling Mudah
+### Langkah di Supabase Dashboard (SQL Editor)
 1. Buka dashboard proyek Supabase Anda: [https://supabase.com/dashboard](https://supabase.com/dashboard)
 2. Masuk ke menu **SQL Editor** di sidebar kiri.
-3. Klik tombol **New query**.
-4. Salin seluruh isi file `supabase/migrations/20261028000000_phase2_init_schema.sql`.
-5. Tempelkan ke dalam SQL Editor, lalu klik **Run**.
-6. Pastikan query berhasil dijalankan (`Success. No rows returned`).
-7. Periksa menu **Table Editor** untuk memastikan tabel berikut telah dibuat:
+3. Klik **New query**, salin seluruh isi file `20261028000000_phase2_init_schema.sql`, lalu klik **Run**.
+4. Buka tab query baru, salin seluruh isi file `20261028000001_phase2_security_patch.sql`, lalu klik **Run**.
+5. Pastikan semua query berhasil dijalankan tanpa error.
+6. Periksa menu **Table Editor** untuk memastikan tabel berikut telah dibuat dan memiliki status **RLS Enabled**:
    - `movies`
    - `moods`
    - `movie_moods`
    - `watch_logs`
-   Serta pastikan status **RLS** pada keempat tabel tersebut bertanda **Enabled**.
-
-### Opsi B: Lewat Supabase CLI
-Jika Anda menggunakan Supabase CLI lokal:
-```bash
-# Login ke akun Supabase
-supabase login
-
-# Tautkan proyek lokal ke proyek Supabase Anda
-supabase link --project-ref <project-ref>
-
-# Jalankan migrasi
-supabase db push
-```
 
 ---
 
 ## 2. Konfigurasi Environment Variables (`.env.local`)
 
-1. Duplikasi file `.env.example` menjadi `.env.local`:
-   ```bash
-   cp .env.example .env.local
-   ```
-2. Dapatkan kredensial dari Supabase Dashboard:
-   - Masuk ke menu **Project Settings** > **API**.
-   - Salin **Project URL**.
-   - Salin **anon** / **public** API Key.
-3. Buka file `.env.local` dan isi nilainya:
+1. Buat file `.env.local` di root proyek:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxxxxxxxxxx.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    ```
    > [!CAUTION]
-   > DILARANG KERAS memasukkan `service_role` key ke dalam aplikasi ini. Aplikasi hanya menggunakan `anon` key dengan autentikasi berbasis sesi pengguna (RLS). Pastikan `.env.local` selalu terdaftar di `.gitignore`.
+   > DILARANG KERAS memasukkan `service_role` key ke dalam aplikasi ini. Aplikasi hanya menggunakan URL dan `anon` key dengan autentikasi berbasis sesi cookie pengguna (RLS). Pastikan `.env.local` selalu terdaftar di `.gitignore` dan tidak pernah di-commit.
 
 ---
 
-## 3. Membuat Akun Pengguna Pertama (Owner)
+## 3. Akun Pengguna & Default Moods
 
-Karena aplikasi MOCAB beroperasi dalam model **single-user** (tanpa form pendaftaran publik di UI):
-1. Masuk ke Supabase Dashboard > **Authentication** > **Users**.
-2. Klik **Add user** > **Create user**.
-3. Masukkan Email dan Password untuk pemilik.
-4. Pastikan opsi **Auto Confirm User?** dicentang agar tidak memerlukan verifikasi email.
-5. Gunakan kredensial ini untuk login melalui halaman `/login` di browser.
-6. Saat pertama kali login, sistem akan otomatis memanggil fungsi `ensure_default_moods()` untuk menyisipkan 7 mood bawaan (Psikologis, Emosional, Romantis, Coming of Age, Gelap, Intens, Reflektif).
+1. Di Supabase Dashboard > **Authentication** > **Users**, buat akun pengguna (Owner) dengan opsi **Auto Confirm User** dicentang.
+2. Login melalui `/login`.
+3. Setelah login berhasil, aplikasi otomatis memanggil `ensure_default_moods()` untuk menyisipkan 7 mood default (Psikologis, Emosional, Romantis, Coming of Age, Gelap, Intens, Reflektif).
