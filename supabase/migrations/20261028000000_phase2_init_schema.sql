@@ -1,7 +1,7 @@
 -- ==============================================================================
--- MOCAB (Movie Cabin) - Migration: Phase 2 Database Schema & Security
+-- MOCAB (Movie Cabin) - Migration: Phase 2 Database Schema & Security (Revised)
 -- Tables: movies, moods, movie_moods, watch_logs
--- Triggers, RLS, Helper Functions
+-- Atomic RPCs, Strict RLS Policies, Constraints, Helper Functions
 -- ==============================================================================
 
 -- Enable UUID extension if not already enabled
@@ -25,12 +25,12 @@ create table if not exists public.movies (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   tmdb_id integer null,
-  title text not null,
+  title text not null check (char_length(trim(title)) >= 1),
   release_year integer null,
   runtime integer null,
   synopsis text null default '',
-  source_url text null default '',
-  watch_url text null default '',
+  source_url text null default null check (source_url is null or source_url ~* '^https?://\S+'),
+  watch_url text null default null check (watch_url is null or watch_url ~* '^https?://\S+'),
   status text not null default 'unwatched' check (status in ('unwatched', 'watched')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -42,12 +42,17 @@ create trigger set_movies_updated_at
   before update on public.movies
   for each row execute function public.handle_updated_at();
 
--- Unique constraint: (user_id, tmdb_id) when tmdb_id is not null
+-- Unique partial index 1: (user_id, tmdb_id) when tmdb_id is not null
 create unique index if not exists movies_user_tmdb_unique
   on public.movies (user_id, tmdb_id)
   where tmdb_id is not null;
 
--- Index for title search and user lookup
+-- Unique partial index 2: (user_id, lower(trim(title)), coalesce(release_year, 0)) when tmdb_id is null
+create unique index if not exists movies_user_title_year_unique
+  on public.movies (user_id, lower(trim(title)), coalesce(release_year, 0))
+  where tmdb_id is null;
+
+-- Query performance indexes
 create index if not exists movies_user_status_idx on public.movies (user_id, status);
 create index if not exists movies_user_created_at_idx on public.movies (user_id, created_at desc);
 
@@ -105,23 +110,22 @@ create trigger set_watch_logs_updated_at
 create index if not exists watch_logs_user_potential_idx on public.watch_logs (user_id, content_potential desc);
 
 -- ------------------------------------------------------------------------------
--- 6. Helper Function: ensure_default_moods(p_user_id)
+-- 6. Helper Function: ensure_default_moods() (Tanpa parameter, pakai auth.uid())
 -- ------------------------------------------------------------------------------
-create or replace function public.ensure_default_moods(p_user_id uuid default auth.uid())
+create or replace function public.ensure_default_moods()
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, auth, pg_temp
 as $$
 declare
-  v_user_id uuid;
+  v_user_id uuid := auth.uid();
 begin
-  v_user_id := coalesce(p_user_id, auth.uid());
   if v_user_id is null then
-    return;
+    raise exception 'Unauthorized: caller must be authenticated';
   end if;
 
-  -- Only insert if user currently has 0 moods
+  -- Only insert if the authenticated user currently has 0 moods
   if not exists (select 1 from public.moods where user_id = v_user_id) then
     insert into public.moods (user_id, name, slug)
     values
@@ -138,7 +142,136 @@ end;
 $$;
 
 -- ------------------------------------------------------------------------------
--- 7. Row Level Security (RLS) Policies
+-- 7. Atomic RPC: save_movie_with_moods
+-- Wajib minimal 1 mood. Rollback otomatis jika ada mood tidak valid.
+-- ------------------------------------------------------------------------------
+create or replace function public.save_movie_with_moods(
+  p_title text,
+  p_release_year integer default null,
+  p_runtime integer default null,
+  p_synopsis text default '',
+  p_source_url text default null,
+  p_watch_url text default null,
+  p_tmdb_id integer default null,
+  p_mood_ids uuid[] default array[]::uuid[]
+)
+returns uuid
+language plpgsql
+security invoker
+set search_path = public, auth, pg_temp
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_movie_id uuid;
+  v_clean_title text;
+  v_clean_source text;
+  v_clean_watch text;
+  v_valid_moods_count integer;
+begin
+  if v_user_id is null then
+    raise exception 'Unauthorized: caller must be authenticated';
+  end if;
+
+  v_clean_title := trim(p_title);
+  if v_clean_title is null or char_length(v_clean_title) < 1 then
+    raise exception 'Judul wajib diisi.';
+  end if;
+
+  if p_mood_ids is null or array_length(p_mood_ids, 1) is null or array_length(p_mood_ids, 1) < 1 then
+    raise exception 'Pilih minimal satu mood.';
+  end if;
+
+  -- Verifikasi bahwa seluruh mood_ids yang diberikan milik user yang sedang aktif
+  select count(distinct id) into v_valid_moods_count
+  from public.moods
+  where id = any(p_mood_ids) and user_id = v_user_id;
+
+  if v_valid_moods_count <> array_length(p_mood_ids, 1) then
+    raise exception 'Satu atau lebih mood tidak valid atau bukan milik akun Anda.';
+  end if;
+
+  v_clean_source := nullif(trim(coalesce(p_source_url, '')), '');
+  v_clean_watch := nullif(trim(coalesce(p_watch_url, '')), '');
+
+  -- Insert film
+  insert into public.movies (
+    user_id,
+    tmdb_id,
+    title,
+    release_year,
+    runtime,
+    synopsis,
+    source_url,
+    watch_url,
+    status
+  ) values (
+    v_user_id,
+    p_tmdb_id,
+    v_clean_title,
+    p_release_year,
+    p_runtime,
+    coalesce(p_synopsis, ''),
+    v_clean_source,
+    v_clean_watch,
+    'unwatched'
+  ) returning id into v_movie_id;
+
+  -- Insert relasi mood (atomik dalam transaksi yang sama)
+  insert into public.movie_moods (movie_id, mood_id)
+  select v_movie_id, unnest(p_mood_ids);
+
+  return v_movie_id;
+end;
+$$;
+
+-- ------------------------------------------------------------------------------
+-- 8. Atomic RPC: update_movie_moods
+-- Wajib minimal 1 mood. Rollback otomatis jika ada mood tidak valid.
+-- ------------------------------------------------------------------------------
+create or replace function public.update_movie_moods(
+  p_movie_id uuid,
+  p_mood_ids uuid[]
+)
+returns void
+language plpgsql
+security invoker
+set search_path = public, auth, pg_temp
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_valid_moods_count integer;
+begin
+  if v_user_id is null then
+    raise exception 'Unauthorized: caller must be authenticated';
+  end if;
+
+  -- Verifikasi kepemilikan film
+  if not exists (select 1 from public.movies where id = p_movie_id and user_id = v_user_id) then
+    raise exception 'Film tidak ditemukan atau bukan milik akun Anda.';
+  end if;
+
+  if p_mood_ids is null or array_length(p_mood_ids, 1) is null or array_length(p_mood_ids, 1) < 1 then
+    raise exception 'Minimal satu mood.';
+  end if;
+
+  -- Verifikasi kepemilikan mood
+  select count(distinct id) into v_valid_moods_count
+  from public.moods
+  where id = any(p_mood_ids) and user_id = v_user_id;
+
+  if v_valid_moods_count <> array_length(p_mood_ids, 1) then
+    raise exception 'Satu atau lebih mood tidak valid atau bukan milik akun Anda.';
+  end if;
+
+  -- Hapus relasi lama dan masukkan relasi baru
+  delete from public.movie_moods where movie_id = p_movie_id;
+  insert into public.movie_moods (movie_id, mood_id)
+  select p_movie_id, unnest(p_mood_ids);
+end;
+$$;
+
+-- ------------------------------------------------------------------------------
+-- 9. Row Level Security (RLS) Policies (Strict)
 -- ------------------------------------------------------------------------------
 
 -- Enable RLS on all tables
@@ -192,7 +325,7 @@ create policy "Users can delete own moods"
   using (user_id = auth.uid());
 
 -- Policies for public.movie_moods
--- Ensures parent movie and mood belong to current user
+-- Memverifikasi film milik user DAN mood milik user pada INSERT & UPDATE
 drop policy if exists "Users can select own movie_moods" on public.movie_moods;
 create policy "Users can select own movie_moods"
   on public.movie_moods for select
@@ -221,6 +354,30 @@ create policy "Users can insert own movie_moods"
     )
   );
 
+drop policy if exists "Users can update own movie_moods" on public.movie_moods;
+create policy "Users can update own movie_moods"
+  on public.movie_moods for update
+  using (
+    exists (
+      select 1 from public.movies m
+      where m.id = movie_moods.movie_id
+        and m.user_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.movies m
+      where m.id = movie_moods.movie_id
+        and m.user_id = auth.uid()
+    )
+    and
+    exists (
+      select 1 from public.moods md
+      where md.id = movie_moods.mood_id
+        and md.user_id = auth.uid()
+    )
+  );
+
 drop policy if exists "Users can delete own movie_moods" on public.movie_moods;
 create policy "Users can delete own movie_moods"
   on public.movie_moods for delete
@@ -233,6 +390,7 @@ create policy "Users can delete own movie_moods"
   );
 
 -- Policies for public.watch_logs
+-- Memverifikasi user_id = auth.uid() DAN parent movie milik user_id yang sama
 drop policy if exists "Users can select own watch_logs" on public.watch_logs;
 create policy "Users can select own watch_logs"
   on public.watch_logs for select
