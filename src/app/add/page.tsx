@@ -8,5 +8,10 @@ export const metadata: Metadata = {
 
 export default async function AddPage() {
   const moods = await listMoods();
-  return <AddMovieView initialMoods={moods.map((m) => m.name)} />;
+  return (
+    <AddMovieView
+      initialMoods={moods.map((m) => m.name)}
+      initialMoodObjects={moods}
+    />
+  );
 }

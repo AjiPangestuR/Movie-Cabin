@@ -63,6 +63,7 @@ export function ArchiveView({ initialMovies = [] }: ArchiveViewProps) {
                       identifier={movie.tmdbId || movie.id}
                       done={movie.done}
                       year={movie.year}
+                      posterUrl={movie.posterUrl}
                       className="w-full"
                     />
                   </Link>

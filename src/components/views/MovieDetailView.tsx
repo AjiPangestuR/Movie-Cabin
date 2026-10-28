@@ -8,14 +8,16 @@ import { updateMovieMoods, deleteMovie } from '@/lib/movies';
 import { PosterCover } from '@/components/PosterCover';
 import { MoodChips } from '@/components/MoodChips';
 import { ConfirmInline } from '@/components/ConfirmInline';
+import { TmdbAttribution } from '@/components/TmdbAttribution';
 import { useToast } from '@/components/Toast';
 
 interface MovieDetailViewProps {
   initialMovie: Movie;
   initialMoods?: string[];
+  posterUrl?: string | null;
 }
 
-export function MovieDetailView({ initialMovie, initialMoods = [] }: MovieDetailViewProps) {
+export function MovieDetailView({ initialMovie, initialMoods = [], posterUrl }: MovieDetailViewProps) {
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -96,6 +98,7 @@ export function MovieDetailView({ initialMovie, initialMoods = [] }: MovieDetail
               identifier={movie.tmdbId || movie.id}
               done={movie.done}
               year={movie.year}
+              posterUrl={posterUrl || movie.posterUrl}
               big
             />
 
@@ -312,6 +315,13 @@ export function MovieDetailView({ initialMovie, initialMoods = [] }: MovieDetail
           )}
         </div>
       </div>
+
+      {/* TMDB Official Attribution bila film terhubung dengan TMDB */}
+      {Boolean(movie.tmdbId) && (
+        <section className="pt-6 border-t border-line/60">
+          <TmdbAttribution />
+        </section>
+      )}
     </div>
   );
 }

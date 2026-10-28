@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { MovieDetailView } from '@/components/views/MovieDetailView';
 import { getMovie, isValidUuid } from '@/lib/movies';
 import { listMoods } from '@/lib/moods';
+import { getTmdbMovieDetail, isTmdbConfigured } from '@/lib/tmdb';
 
 interface MovieDetailPageProps {
   params: Promise<{
@@ -32,5 +33,23 @@ export default async function MovieDetailPage({ params }: MovieDetailPageProps) 
     notFound();
   }
 
-  return <MovieDetailView initialMovie={movie} initialMoods={moods.map((m) => m.name)} />;
+  // Jika film memiliki tmdbId dan token TMDB dikonfigurasi pada server,
+  // ambil metadata detail TMDB secara aman untuk menampilkan poster resmi
+  let posterUrl: string | null = null;
+  if (movie.tmdbId && isTmdbConfigured()) {
+    try {
+      const detail = await getTmdbMovieDetail(movie.tmdbId);
+      posterUrl = detail.posterUrl;
+    } catch {
+      // Abaikan bila TMDB offline atau rate limited; fallback tipografis generatif MOCAB akan aktif
+    }
+  }
+
+  return (
+    <MovieDetailView
+      initialMovie={movie}
+      initialMoods={moods.map((m) => m.name)}
+      posterUrl={posterUrl}
+    />
+  );
 }

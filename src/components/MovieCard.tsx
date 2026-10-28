@@ -24,6 +24,7 @@ export function MovieCard({
           identifier={movie.tmdbId || movie.id}
           done={movie.done}
           year={movie.year}
+          posterUrl={movie.posterUrl}
           className="group-hover:scale-[1.02] transition-transform duration-300"
         />
       </div>
