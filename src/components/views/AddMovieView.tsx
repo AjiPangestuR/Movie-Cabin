@@ -22,6 +22,7 @@ interface SelectedMovieState {
   runtime: number | string;
   syn: string;
   posterUrl?: string | null;
+  posterPath?: string | null;
 }
 
 interface AddMovieViewProps {
@@ -156,6 +157,7 @@ export function AddMovieView({ initialMoods = [], initialMoodObjects = [] }: Add
       runtime: '',
       syn: item.overview,
       posterUrl: item.posterUrl,
+      posterPath: item.posterPath,
     });
 
     // 2. Ambil detail film (untuk runtime) di latar belakang bila ID valid
@@ -171,8 +173,9 @@ export function AddMovieView({ initialMoods = [], initialMoodObjects = [] }: Add
               ...prev,
               runtime: detail.runtime || prev.runtime,
               syn: detail.overview || prev.syn,
-              // Pertahankan posterUrl yang sudah ada bila detail tidak menyediakannya
+              // Pertahankan posterUrl dan posterPath yang sudah ada bila detail tidak menyediakannya
               posterUrl: detail.posterUrl || prev.posterUrl,
+              posterPath: detail.posterPath || prev.posterPath,
             };
           });
         }
@@ -192,6 +195,7 @@ export function AddMovieView({ initialMoods = [], initialMoodObjects = [] }: Add
       runtime: '',
       syn: '',
       posterUrl: null,
+      posterPath: null,
     });
   };
 
@@ -280,6 +284,7 @@ export function AddMovieView({ initialMoods = [], initialMoodObjects = [] }: Add
         moods: selectedMoods,
         synopsis: selectedMovie.syn,
         watchUrl: cleanUrl,
+        posterPath: selectedMovie.posterPath || null,
       });
 
       showToast(`"${newMovie.title}" masuk ke Kabin.`);

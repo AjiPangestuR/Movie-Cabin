@@ -19,6 +19,7 @@ export interface Movie {
   done: boolean;
   log?: WatchLog;
   posterUrl?: string | null;
+  posterPath?: string | null;
 }
 
 export interface Mood {

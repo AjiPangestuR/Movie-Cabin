@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { Movie, WatchLog } from '@/types';
+import { buildPosterUrl } from '@/lib/tmdb';
 import {
   isValidUuid,
   validateMovieInput,
@@ -32,6 +33,7 @@ export async function listMovies(): Promise<Movie[]> {
       synopsis,
       source_url,
       watch_url,
+      poster_path,
       status,
       created_at,
       movie_moods (
@@ -71,6 +73,8 @@ export async function listMovies(): Promise<Movie[]> {
       watchUrl: row.watch_url || '',
       done: row.status === 'watched',
       log,
+      posterUrl: row.poster_path ? buildPosterUrl(row.poster_path, 'w500') : null,
+      posterPath: row.poster_path ?? null,
     };
   });
 }
@@ -96,6 +100,7 @@ export async function getMovie(id: string): Promise<Movie | undefined> {
       synopsis,
       source_url,
       watch_url,
+      poster_path,
       status,
       created_at,
       movie_moods (
@@ -134,6 +139,8 @@ export async function getMovie(id: string): Promise<Movie | undefined> {
     watchUrl: data.watch_url || '',
     done: data.status === 'watched',
     log,
+    posterUrl: data.poster_path ? buildPosterUrl(data.poster_path, 'w500') : null,
+    posterPath: data.poster_path ?? null,
   };
 }
 
@@ -145,6 +152,7 @@ export interface AddMovieInput {
   moods: string[]; // nama mood
   synopsis: string;
   watchUrl?: string;
+  posterPath?: string | null;
 }
 
 /**
@@ -177,6 +185,7 @@ export async function addMovie(input: AddMovieInput): Promise<Movie> {
     p_watch_url: cleanUrl || null,
     p_tmdb_id: input.tmdbId ?? null,
     p_mood_ids: moodIds,
+    p_poster_path: input.posterPath || null,
   });
 
   if (rpcErr) {

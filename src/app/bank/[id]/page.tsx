@@ -33,10 +33,11 @@ export default async function MovieDetailPage({ params }: MovieDetailPageProps) 
     notFound();
   }
 
-  // Jika film memiliki tmdbId dan token TMDB dikonfigurasi pada server,
-  // ambil metadata detail TMDB secara aman untuk menampilkan poster resmi
-  let posterUrl: string | null = null;
-  if (movie.tmdbId && isTmdbConfigured()) {
+  // Gunakan posterUrl yang sudah dipersist di database jika ada.
+  // Fallback: Untuk film lama yang belum memiliki poster_path di database,
+  // ambil dari TMDB jika tmdbId tersedia dan TMDB dikonfigurasi.
+  let posterUrl: string | null = movie.posterUrl ?? null;
+  if (!posterUrl && movie.tmdbId && isTmdbConfigured()) {
     try {
       const detail = await getTmdbMovieDetail(movie.tmdbId);
       posterUrl = detail.posterUrl;

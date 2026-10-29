@@ -35,6 +35,11 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
     setShuffleKey((k) => k + 1);
   };
 
+  const handleClearMoods = () => {
+    setSelectedMoods([]);
+    setShuffleKey((k) => k + 1);
+  };
+
   const handleShuffle = () => {
     setShuffleKey((k) => k + 1);
   };
@@ -48,7 +53,13 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
   }, [movies, selectedMoods]);
 
   const picks: Movie[] = useMemo(() => {
-    if (shuffleKey < 0) return [];
+    if (unwatchedCandidates.length === 0) return [];
+    // Pada initial render (shuffleKey === 0), kembalikan 3 film pertama secara deterministik
+    // untuk mencegah React hydration mismatch antara Server HTML dan Client Virtual DOM.
+    if (shuffleKey === 0) {
+      return unwatchedCandidates.slice(0, 3);
+    }
+    // Pengacakan hanya dijalankan ketika pengguna berinteraksi (menekan "Acak lagi" atau filter mood).
     return shuffleArray(unwatchedCandidates).slice(0, 3);
   }, [unwatchedCandidates, shuffleKey]);
 
@@ -81,7 +92,7 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
               {hasMoodFilter && (
                 <button
                   type="button"
-                  onClick={() => setSelectedMoods([])}
+                  onClick={handleClearMoods}
                   className="text-xs text-muted hover:text-accent transition-colors cursor-pointer"
                 >
                   Lepas filter ({selectedMoods.length})
