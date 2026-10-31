@@ -17,26 +17,26 @@ export function MovieCard({
   className = '',
 }: MovieCardProps) {
   const content = (
-    <article className="group flex flex-col h-full text-left">
-      <div className="relative overflow-hidden rounded-lg">
+    <article className="group flex flex-col h-full text-left transition-all">
+      <div className="relative overflow-hidden rounded-xl">
         <PosterCover
           title={movie.title}
           identifier={movie.tmdbId || movie.id}
           done={movie.done}
           year={movie.year}
           posterUrl={movie.posterUrl}
-          className="group-hover:scale-[1.02] transition-transform duration-300"
+          className="transition-transform duration-200 group-hover:scale-[1.02]"
         />
       </div>
 
       <div className="pt-2.5 pb-1 flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="font-sans font-medium text-sm sm:text-[15px] leading-snug text-text group-hover:text-accent transition-colors line-clamp-1">
+          <h3 className="font-sans font-semibold text-sm sm:text-[15px] leading-snug text-text group-hover:text-primary-bright transition-colors line-clamp-1">
             {movie.title}
           </h3>
 
           <div className="text-muted text-xs mt-1 flex items-center gap-1.5 flex-wrap">
-            {movie.year && <span>{movie.year}</span>}
+            {movie.year && <span className="font-pixel text-[11px] text-muted">{movie.year}</span>}
             {movie.runtime && (
               <>
                 <span className="text-muted/40">·</span>
@@ -46,7 +46,7 @@ export function MovieCard({
             {movie.moods && movie.moods.length > 0 && (
               <>
                 <span className="text-muted/40">·</span>
-                <span className="text-text-subtle/80">{movie.moods[0]}</span>
+                <span className="text-lavender/90">#{movie.moods[0]}</span>
                 {movie.moods.length > 1 && (
                   <span className="text-muted/60 text-[10px]">+{movie.moods.length - 1}</span>
                 )}
@@ -58,7 +58,7 @@ export function MovieCard({
         {movie.log && (
           <div className="mt-2 pt-1.5 border-t border-line/40 flex items-center justify-between text-[11px] text-muted">
             <span>Rating {movie.log.rating}/10</span>
-            <span className="text-accent font-medium">Potensi {movie.log.contentPotential}/10</span>
+            <span className="text-neon-magenta font-semibold">Potensi {movie.log.contentPotential}/10</span>
           </div>
         )}
       </div>
@@ -70,7 +70,7 @@ export function MovieCard({
       <button
         type="button"
         onClick={onClick}
-        className={`block w-full text-left focus-visible:ring-2 focus-visible:ring-accent rounded-lg transition-opacity ${className}`}
+        className={`block w-full text-left focus-visible:outline-2 focus-visible:outline-primary rounded-xl transition-opacity ${className}`}
       >
         {content}
       </button>
@@ -80,7 +80,7 @@ export function MovieCard({
   return (
     <Link
       href={href}
-      className={`block w-full text-left focus-visible:ring-2 focus-visible:ring-accent rounded-lg transition-opacity ${className}`}
+      className={`block w-full text-left focus-visible:outline-2 focus-visible:outline-primary rounded-xl transition-opacity ${className}`}
     >
       {content}
     </Link>

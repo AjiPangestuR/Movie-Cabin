@@ -1,42 +1,94 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #121017;
-  --color-surface: #1A1622;
-  --color-surface-elevated: #221D2D;
-  --color-surface-hover: #292336;
-  --color-line: #292336;
-  --color-line-subtle: rgba(243, 238, 248, 0.07);
-  --color-text: #F3EEF8;
-  --color-text-subtle: #D5CBE3;
-  --color-muted: #9E94AC;
-  --color-accent: #A78BFA;
-  --color-accent-soft: rgba(167, 139, 250, 0.12);
-  --color-accent-hover: #9675cd;
-  --color-ok: #8FB89A;
-  --color-danger: #E06C8B;
-  --color-amber: #E5A967;
+  /* Retro VHS Core Theme Colors */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
+  --color-primary: var(--primary);
+  --color-primary-bright: var(--primary-bright);
+  --color-neon-magenta: var(--neon-magenta);
+  --color-lavender: var(--lavender);
+  --color-text: var(--text);
+  --color-text-subtle: var(--text-subtle);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-subtle: var(--line-subtle);
 
+  /* Compatibility Tokens for Existing Components */
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-hover: var(--accent-hover);
+  --color-ok: var(--ok);
+  --color-danger: var(--danger);
+  --color-amber: var(--amber);
+
+  /* Typography */
   --font-serif: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-pixel: var(--font-pixel), 'Courier New', monospace;
 }
 
-:root {
-  --bg: #121017;
-  --surface: #1A1622;
-  --surface-elevated: #221D2D;
-  --surface-hover: #292336;
-  --line: #292336;
-  --line-subtle: rgba(243, 238, 248, 0.07);
-  --text: #F3EEF8;
-  --text-subtle: #D5CBE3;
-  --muted: #9E94AC;
-  --accent: #A78BFA;
-  --accent-soft: rgba(167, 139, 250, 0.12);
+:root,
+[data-theme='dark'] {
+  /* Default: Retro VHS Dark Mode */
+  color-scheme: dark;
+
+  --bg: #0B0812;
+  --surface: #15101F;
+  --surface-elevated: #21152E;
+  --surface-hover: #2C1C3D;
+  --primary: #9B35E8;
+  --primary-bright: #C16BFF;
+  --neon-magenta: #F044C8;
+  --lavender: #D9B0FF;
+  --text: #F8F0FF;
+  --text-subtle: #D9B0FF;
+  --muted: #A99AB8;
+  --line: #352044;
+  --line-subtle: rgba(240, 68, 200, 0.15);
+
+  /* Compatibility tokens for existing components */
+  --accent: #C16BFF;
+  --accent-soft: rgba(193, 107, 255, 0.15);
+  --accent-hover: #9B35E8;
   --ok: #8FB89A;
-  --danger: #E06C8B;
+  --danger: #F04468;
+  --amber: #E5A967;
+
+  /* Font variables */
   --serif: var(--font-fraunces), Georgia, serif;
   --sans: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --pixel: var(--font-pixel), 'Courier New', monospace;
+}
+
+/* Retro VHS Light Mode Theme */
+[data-theme='light'],
+.light {
+  color-scheme: light;
+
+  --bg: #F7F1FC;
+  --surface: #FFFFFF;
+  --surface-elevated: #EFE3F8;
+  --surface-hover: #E6D3F2;
+  --primary: #792DB5;
+  --primary-bright: #9B35E8;
+  --neon-magenta: #D82EAA;
+  --lavender: #6A4A87;
+  --text: #291536;
+  --text-subtle: #6A4A87;
+  --muted: #796783;
+  --line: #E2D0ED;
+  --line-subtle: rgba(121, 45, 181, 0.12);
+
+  /* Compatibility tokens for existing components */
+  --accent: #9B35E8;
+  --accent-soft: rgba(155, 53, 232, 0.12);
+  --accent-hover: #792DB5;
+  --ok: #3B8754;
+  --danger: #D82E4D;
+  --amber: #C97E2E;
 }
 
 * {
@@ -45,6 +97,35 @@
 
 html {
   color-scheme: dark;
+}
+
+html[data-theme='light'],
+html.light {
+  color-scheme: light;
+}
+
+/* Theme Toggle icon display based on theme */
+.theme-icon-sun {
+  display: block;
+}
+.theme-icon-moon {
+  display: none;
+}
+
+[data-theme='light'] .theme-icon-sun,
+.light .theme-icon-sun {
+  display: none;
+}
+
+[data-theme='light'] .theme-icon-moon,
+.light .theme-icon-moon {
+  display: block;
+}
+
+/* Ensure mobile bottom navigation adheres to light theme */
+[data-theme='light'] nav[aria-label="Navigasi mobile"],
+.light nav[aria-label="Navigasi mobile"] {
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 body {
@@ -122,44 +203,108 @@ h3 {
   text-decoration: none;
   color: var(--text);
   font-size: 14px;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
-.btn:hover:not([disabled]) {
+.btn:hover:not([disabled]):not(:disabled) {
   background: var(--surface-hover);
-  border-color: rgba(167, 139, 250, 0.35);
-  color: #FFFFFF;
+  border-color: var(--primary);
+  color: var(--text);
 }
 
+.btn:active:not([disabled]):not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--primary-bright);
+  outline-offset: 2px;
+}
+
+/* Primary: Vivid Purple-to-Magenta gradient */
 .btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #121017;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--neon-magenta) 100%);
+  border-color: transparent;
+  color: #FFFFFF;
   font-weight: 600;
+  box-shadow: 0 2px 10px rgba(155, 53, 232, 0.25);
 }
 
-.btn.primary:hover:not([disabled]) {
-  background: #B49BFA;
-  border-color: #B49BFA;
-  color: #121017;
-  box-shadow: 0 4px 16px rgba(167, 139, 250, 0.25);
+.btn.primary:hover:not([disabled]):not(:disabled) {
+  background: linear-gradient(135deg, var(--primary-bright) 0%, var(--neon-magenta) 100%);
+  border-color: transparent;
+  color: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(240, 68, 200, 0.35);
+  transform: translateY(-1px);
 }
 
+.btn.primary:active:not([disabled]):not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Secondary: Surface with semantic border */
+.btn.secondary {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.btn.secondary:hover:not([disabled]):not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+  color: var(--text);
+}
+
+/* Ghost: Transparent, hover follows theme */
+.btn.ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+}
+
+.btn.ghost:hover:not([disabled]):not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: var(--line);
+}
+
+/* Danger: Semantic red accent */
 .btn.danger {
+  background: rgba(240, 68, 104, 0.1);
+  border: 1px solid rgba(240, 68, 104, 0.3);
   color: var(--danger);
-  border-color: rgba(224, 108, 139, 0.25);
 }
 
-.btn.danger:hover:not([disabled]) {
-  background: rgba(224, 108, 139, 0.12);
-  border-color: rgba(224, 108, 139, 0.5);
+.btn.danger:hover:not([disabled]):not(:disabled) {
+  background: rgba(240, 68, 104, 0.2);
+  border-color: var(--danger);
   color: #FFA4BB;
 }
 
-.btn[disabled] {
-  opacity: 0.4;
+.btn[disabled],
+.btn:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Generic card container */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:hover {
+  background: var(--surface-hover);
+  border-color: var(--line-subtle);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .link {
@@ -179,6 +324,7 @@ h3 {
 input[type="text"],
 input[type="email"],
 input[type="password"],
+input[type="search"],
 textarea,
 select {
   width: 100%;
@@ -188,23 +334,31 @@ select {
   padding: 11px 14px;
   font-size: 14px;
   color: var(--text);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
+input[type="search"]:focus,
 textarea:focus,
 select:focus {
   background: var(--surface-elevated);
-  border-color: var(--accent);
+  border-color: var(--primary-bright);
   outline: none;
-  box-shadow: 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 2px rgba(193, 107, 255, 0.25);
+}
+
+.input-error,
+input.error,
+textarea.error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 2px rgba(240, 68, 104, 0.2) !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #6C637A;
+  color: var(--muted);
 }
 
 textarea {
@@ -266,6 +420,21 @@ label {
   background: var(--surface-hover);
   border-color: rgba(167, 139, 250, 0.35);
   transform: translateY(-1px);
+}
+
+/* Dialog & dropdown custom scrollbars */
+[role="dialog"] ::-webkit-scrollbar {
+  width: 6px;
+}
+[role="dialog"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+[role="dialog"] ::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 9999px;
+}
+[role="dialog"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
 
 /* Reduced motion preference */

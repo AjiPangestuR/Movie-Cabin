@@ -197,7 +197,7 @@ export function MoodManagerModal({
 
         {/* Add Mood Form */}
         <form onSubmit={handleAdd} className="p-4 sm:p-5 border-b border-line/60 flex-none bg-surface-elevated/40">
-          <label htmlFor="new-mood-input" className="!mt-0 text-[11px] font-mono uppercase tracking-wider text-muted block mb-1.5">
+          <label htmlFor="new-mood-input" className="!mt-0 text-[10px] font-pixel uppercase tracking-wider text-muted block mb-1.5">
             Tambah Mood Baru
           </label>
           <div className="flex gap-2">
@@ -209,7 +209,7 @@ export function MoodManagerModal({
               onChange={(e) => setNewMoodName(e.target.value)}
               maxLength={24}
               disabled={isAdding}
-              className="flex-1 bg-bg border border-line rounded-lg px-3 py-2 text-sm text-text placeholder:text-muted/60 focus:border-accent transition-all"
+              className="flex-1 bg-bg border border-line rounded-lg px-3 py-2 text-sm text-text placeholder:text-muted/60 focus:border-primary-bright transition-all"
             />
             <button
               type="submit"
@@ -218,7 +218,7 @@ export function MoodManagerModal({
             >
               {isAdding ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-[#121017] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Menyimpan...</span>
                 </>
               ) : (
@@ -235,13 +235,13 @@ export function MoodManagerModal({
 
         {/* Mood List */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-2">
-          <div className="text-[11px] font-mono uppercase tracking-wider text-muted mb-2 flex items-center justify-between">
+          <div className="text-[10px] font-pixel uppercase tracking-wider text-muted mb-2 flex items-center justify-between">
             <span>Daftar Mood Aktif</span>
             <span>Aksi</span>
           </div>
 
           {moods.length === 0 ? (
-            <div className="text-center py-8 text-muted text-xs font-mono">
+            <div className="text-center py-8 text-muted text-xs font-pixel">
               Belum ada mood tersimpan. Tambahkan mood pertama di atas.
             </div>
           ) : (
@@ -263,13 +263,13 @@ export function MoodManagerModal({
                         maxLength={24}
                         autoFocus
                         aria-label={`Ubah nama mood ${mood.name}`}
-                        className="flex-1 bg-bg border border-accent rounded px-2.5 py-1 text-sm text-text"
+                        className="flex-1 bg-bg border border-primary rounded px-2.5 py-1 text-sm text-text"
                       />
                       <button
                         type="button"
                         onClick={() => handleRename(mood.id)}
                         disabled={isUpdating || !editingName.trim()}
-                        className="btn text-xs py-1 px-2.5 bg-accent text-[#121017] hover:bg-accent/90 cursor-pointer disabled:opacity-50"
+                        className="btn primary text-xs py-1 px-2.5 cursor-pointer disabled:opacity-50"
                         title="Simpan perubahan nama"
                       >
                         {isUpdating ? '...' : 'Simpan'}
@@ -278,7 +278,7 @@ export function MoodManagerModal({
                         type="button"
                         onClick={cancelEditing}
                         disabled={isUpdating}
-                        className="btn text-xs py-1 px-2 bg-surface text-muted hover:text-text cursor-pointer"
+                        className="btn text-xs py-1 px-2 bg-surface border border-line text-muted hover:text-text cursor-pointer"
                         title="Batal edit"
                       >
                         Batal

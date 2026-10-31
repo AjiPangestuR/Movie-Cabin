@@ -36,10 +36,10 @@ export function NumberScale({
             aria-checked={isSelected}
             onClick={() => onChange(num)}
             aria-label={`${ariaLabelPrefix} ${num}`}
-            className={`flex items-center justify-center py-2.5 sm:py-3 px-0 rounded-lg border text-sm font-medium transition-all duration-150 cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-accent ${
+            className={`flex items-center justify-center py-2.5 sm:py-3 px-0 rounded-xl border text-sm font-medium transition-all duration-150 cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-primary ${
               isSelected
-                ? 'bg-accent border-accent text-[#121017] font-bold shadow-md shadow-accent/20 scale-[1.03]'
-                : 'border-line bg-surface/60 text-muted hover:border-line-subtle hover:text-text hover:bg-surface-elevated'
+                ? 'bg-gradient-to-tr from-primary to-neon-magenta border-transparent text-white font-bold shadow-md shadow-primary/25 scale-[1.04]'
+                : 'border-line bg-surface/70 text-muted hover:border-line-subtle hover:text-text hover:bg-surface-elevated'
             }`}
           >
             {num}

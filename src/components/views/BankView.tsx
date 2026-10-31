@@ -5,6 +5,8 @@ import { Movie, StatusFilter, SortOption } from '@/types';
 import { MoodChips } from '@/components/MoodChips';
 import { MovieCard } from '@/components/MovieCard';
 import { EmptyState } from '@/components/EmptyState';
+import { Badge } from '@/components/Badge';
+import { FilmStripDivider } from '@/components/FilmStripDivider';
 
 const STATUS_OPTIONS: { key: StatusFilter; label: string }[] = [
   { key: 'all', label: 'Semua Film' },
@@ -81,46 +83,60 @@ export function BankView({ initialMovies = [], initialMoods = [] }: BankViewProp
     return filtered;
   }, [movies, search, selectedMoods, status, sort]);
 
-  const isFiltered = search.trim().length > 0 || selectedMoods.length > 0 || status !== 'all';
+  const isFiltered = search.trim().length > 0 || selectedMoods.length > 0 || status !== 'all' || sort !== 'new';
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      {/* Editorial Header */}
-      <section className="border-b border-line/60 pb-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className="space-y-8 sm:space-y-10 pb-8">
+      {/* ─────────────────────────────────────────────────────────────
+          EDITORIAL HEADER (Retro VHS Library Shelf)
+         ───────────────────────────────────────────────────────────── */}
+      <section className="border-b border-line/60 pb-6 sm:pb-8">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 mb-2 text-xs font-mono tracking-widest uppercase text-muted/70">
-              <span>The Film Library</span>
-              <span className="text-muted/30">/</span>
-              <span>Koleksi Lengkap</span>
+            {/* OSD Status Bar */}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <Badge variant="movie" size="xs">
+                LIBRARY CATALOG
+              </Badge>
+              <span className="text-[10px] font-pixel text-muted tracking-wider uppercase">
+                MOCAB TAPE RACK
+              </span>
+              <span className="text-[10px] font-pixel text-muted/60 tracking-wider ml-auto hidden sm:inline" aria-hidden="true">
+                SP 120 MIN // VOL. 01
+              </span>
             </div>
+
             <h1 className="font-serif font-bold text-3xl sm:text-4xl text-text tracking-tight">
               Movie Bank
             </h1>
-            <p className="text-muted text-sm mt-1">
-              Perpustakaan film pribadi Beruang Sastra untuk riset sinema dan ide konten.
+            <p className="text-muted text-sm sm:text-base mt-2 max-w-xl leading-relaxed">
+              Perpustakaan film pribadi Beruang Sastra. Jelajahi rak koleksi, saring status tontonan,
+              atau temukan film berikutnya berdasarkan mood dan potensi konten.
             </p>
           </div>
 
-          {/* Quick Collection Ledger / Stats */}
-          <div className="flex items-center gap-3 text-xs font-mono text-muted/80 self-start sm:self-auto bg-surface/60 px-3.5 py-2 rounded-lg border border-line-subtle">
-            <div>
-              <span className="text-text font-semibold">{stats.total}</span> Total
+          {/* Quick Collection Ledger / Stats Strip */}
+          <div className="flex items-center gap-3 text-xs self-start lg:self-auto bg-surface/80 p-2 sm:p-2.5 rounded-xl border border-line shadow-xs">
+            <div className="px-3 py-1 rounded-lg bg-surface-elevated/70">
+              <span className="font-serif font-bold text-base text-text block leading-none">{stats.total}</span>
+              <span className="text-[9px] font-pixel text-muted uppercase">Total</span>
             </div>
-            <span className="text-line">|</span>
-            <div>
-              <span className="text-text-subtle font-semibold">{stats.unwatched}</span> Belum
+            <div className="px-3 py-1 rounded-lg bg-primary/10 border border-primary/20">
+              <span className="font-serif font-bold text-base text-primary-bright block leading-none">{stats.unwatched}</span>
+              <span className="text-[9px] font-pixel text-primary-bright uppercase">Watchlist</span>
             </div>
-            <span className="text-line">|</span>
-            <div>
-              <span className="text-ok font-semibold">{stats.watched}</span> Selesai
+            <div className="px-3 py-1 rounded-lg bg-ok/10 border border-ok/20">
+              <span className="font-serif font-bold text-base text-ok block leading-none">{stats.watched}</span>
+              <span className="text-[9px] font-pixel text-ok uppercase">Selesai</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Filter and Search Controls */}
-      <section className="space-y-4">
+      {/* ─────────────────────────────────────────────────────────────
+          SEARCH & FILTER CONTROLS
+         ───────────────────────────────────────────────────────────── */}
+      <section className="card p-5 sm:p-6 space-y-5">
         {/* Search Bar */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
@@ -130,20 +146,20 @@ export function BankView({ initialMovies = [], initialMoods = [] }: BankViewProp
             </svg>
           </div>
           <input
-            type="text"
+            type="search"
             id="q"
             placeholder="Cari berdasarkan judul film..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            aria-label="Cari judul film"
-            className="pl-10 pr-11 py-2.5 bg-surface border border-line rounded-lg text-sm text-text placeholder:text-muted/60 focus:border-accent focus:bg-surface-elevated transition-all w-full"
+            aria-label="Cari judul film di Movie Bank"
+            className="pl-10 pr-11 py-2.5 bg-bg/70 border border-line rounded-xl text-sm text-text placeholder:text-muted/60 focus:border-primary-bright focus:bg-surface-elevated transition-all w-full"
           />
           {search && (
             <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center">
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="w-7 h-7 rounded flex items-center justify-center text-muted hover:text-text hover:bg-surface-elevated cursor-pointer transition-colors"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-text hover:bg-surface-elevated cursor-pointer transition-colors"
                 aria-label="Hapus kata kunci pencarian"
                 title="Hapus pencarian"
               >
@@ -157,22 +173,34 @@ export function BankView({ initialMovies = [], initialMoods = [] }: BankViewProp
 
         {/* Mood Chips Row */}
         {availableMoods.length > 0 && (
-          <div>
-            <div className="text-[11px] uppercase font-mono tracking-wider text-muted mb-1.5">
-              Filter Mood
+          <div className="pt-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-pixel uppercase tracking-wider text-muted">
+                FILTER MOOD ({selectedMoods.length ? `${selectedMoods.length} AKTIF` : 'SEMUA'})
+              </span>
+              {selectedMoods.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedMoods([])}
+                  className="text-xs text-neon-magenta hover:underline cursor-pointer"
+                >
+                  Reset Mood
+                </button>
+              )}
             </div>
             <MoodChips
               moods={availableMoods}
               selectedMoods={selectedMoods}
               onToggle={handleToggleMood}
+              wrap
             />
           </div>
         )}
 
         {/* Status Pills and Sorting Dropdown */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-line/50">
           {/* Status Options */}
-          <div className="flex gap-1.5 overflow-x-auto py-1 [scrollbar-width:none]">
+          <div className="flex gap-2 overflow-x-auto py-1 [scrollbar-width:none]">
             {STATUS_OPTIONS.map((opt) => {
               const active = status === opt.key;
               return (
@@ -180,10 +208,11 @@ export function BankView({ initialMovies = [], initialMoods = [] }: BankViewProp
                   key={opt.key}
                   type="button"
                   onClick={() => setStatus(opt.key)}
-                  className={`flex-none px-3.5 py-1.5 rounded-full border text-xs sm:text-[13px] transition-all duration-150 cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-accent ${
+                  aria-pressed={active}
+                  className={`flex-none px-3.5 py-1.5 rounded-xl border text-xs sm:text-[13px] transition-all duration-150 cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-primary ${
                     active
-                      ? 'bg-accent/15 border-accent text-text font-medium shadow-xs shadow-accent/20'
-                      : 'bg-surface/60 border-line text-muted hover:border-line-subtle hover:text-text hover:bg-surface-elevated'
+                      ? 'bg-neon-magenta/15 border-neon-magenta/40 text-neon-magenta font-semibold shadow-xs shadow-neon-magenta/15'
+                      : 'bg-surface/80 border-line text-muted hover:border-line-subtle hover:text-text hover:bg-surface-elevated'
                   }`}
                 >
                   {opt.label}
@@ -192,17 +221,17 @@ export function BankView({ initialMovies = [], initialMoods = [] }: BankViewProp
             })}
           </div>
 
-          {/* Sort Control */}
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <label htmlFor="sort" className="!m-0 text-xs text-muted whitespace-nowrap">
-              Urutkan:
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <label htmlFor="sort" className="!m-0 text-xs font-pixel text-muted uppercase whitespace-nowrap">
+              URUTKAN:
             </label>
             <select
               id="sort"
-              aria-label="Urutkan film"
+              aria-label="Urutkan koleksi film"
               value={sort}
               onChange={(e) => setSort(e.target.value as SortOption)}
-              className="py-1.5 px-3 bg-surface border border-line rounded-lg text-xs sm:text-sm text-text cursor-pointer focus:border-accent w-auto"
+              className="py-1.5 px-3 bg-surface border border-line rounded-xl text-xs sm:text-sm text-text cursor-pointer focus:border-primary-bright focus:outline-none w-auto"
             >
               <option value="new">Terbaru Ditambahkan</option>
               <option value="title">Judul (A-Z)</option>
@@ -211,16 +240,16 @@ export function BankView({ initialMovies = [], initialMoods = [] }: BankViewProp
           </div>
         </div>
 
-        {/* Filter Feedback and Reset */}
+        {/* Filter Feedback and Reset Row */}
         {isFiltered && (
-          <div className="flex items-center justify-between text-xs text-muted pt-2 border-t border-line/40">
+          <div className="flex items-center justify-between text-xs text-muted pt-3 border-t border-line/40">
             <span>
-              Menampilkan <strong className="text-text">{filteredMovies.length}</strong> dari {movies.length} film
+              Menampilkan <strong className="text-text font-bold">{filteredMovies.length}</strong> dari {movies.length} film
             </span>
             <button
               type="button"
               onClick={handleResetFilters}
-              className="text-accent hover:underline cursor-pointer"
+              className="text-xs font-semibold text-neon-magenta hover:underline cursor-pointer"
             >
               Reset semua filter
             </button>
@@ -228,10 +257,15 @@ export function BankView({ initialMovies = [], initialMoods = [] }: BankViewProp
         )}
       </section>
 
-      {/* Grid or Empty State */}
-      <section>
+      {/* Film Strip Divider */}
+      <FilmStripDivider label="TAPE SHELF // ALL TITLES" />
+
+      {/* ─────────────────────────────────────────────────────────────
+          MOVIE GRID (5-6 cols Desktop, 3-4 cols Tablet, 2 cols Mobile)
+         ───────────────────────────────────────────────────────────── */}
+      <section aria-label="Daftar Koleksi Film">
         {filteredMovies.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
             {filteredMovies.map((movie) => (
               <MovieCard key={movie.id} movie={movie} />
             ))}

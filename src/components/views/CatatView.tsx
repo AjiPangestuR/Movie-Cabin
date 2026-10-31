@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Movie } from '@/types';
 import { saveLog } from '@/lib/movies';
 import { NumberScale } from '@/components/NumberScale';
+import { Badge } from '@/components/Badge';
 import { useToast } from '@/components/Toast';
 
 interface CatatViewProps {
@@ -62,7 +63,7 @@ export function CatatView({ movie }: CatatViewProps) {
       <nav aria-label="Navigasi pembatalan">
         <Link
           href={`/bank/${movie.id}`}
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted hover:text-accent transition-colors font-medium group"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted hover:text-primary-bright transition-colors font-medium group"
         >
           <svg
             viewBox="0 0 16 16"
@@ -76,16 +77,19 @@ export function CatatView({ movie }: CatatViewProps) {
       </nav>
 
       {/* Editorial Header */}
-      <section className="border-b border-line/60 pb-6">
-        <div className="flex items-center gap-2 mb-2 text-xs font-mono tracking-widest uppercase text-muted/70">
-          <span>After Watch</span>
-          <span className="text-muted/30">/</span>
+      <section className="border-b border-line pb-6">
+        <div className="flex items-center gap-2 mb-2 text-xs font-pixel tracking-wider uppercase text-lavender flex-wrap">
+          <Badge variant="review" size="xs">AFTER WATCH</Badge>
+          <span className="text-muted/40">/</span>
           <span>Refleksi Sinematik</span>
+          <span className="text-[10px] font-pixel text-muted/60 tracking-wider ml-auto hidden sm:inline" aria-hidden="true">
+            BERUANG SASTRA // JOURNAL
+          </span>
         </div>
         <h1 className="font-serif font-bold text-2xl sm:text-3xl lg:text-4xl text-text tracking-tight leading-tight">
           {movie.title}
         </h1>
-        <p className="text-muted text-sm mt-1 leading-relaxed">
+        <p className="text-muted text-sm mt-1.5 leading-relaxed">
           Tangkap gagasan, impresi visual, dan angle konten sebelum emosi menontonnya menguap.
         </p>
       </section>
@@ -93,16 +97,17 @@ export function CatatView({ movie }: CatatViewProps) {
       {/* Reflection Form */}
       <form onSubmit={handleSave} className="space-y-6 sm:space-y-7">
         {/* Rating 1-10 Section */}
-        <section className="panel space-y-3 bg-surface-elevated/60">
+        <section className="panel space-y-3 bg-surface-elevated/70 border border-line rounded-2xl p-5 shadow-sm">
           <div className="flex items-baseline justify-between">
-            <label className="!mt-0 text-xs font-mono uppercase tracking-wider text-muted">
-              1. Rating Film <span className="text-danger">*</span>
+            <label className="!mt-0 text-xs font-pixel uppercase tracking-wider text-muted flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-bright" />
+              <span>1. Rating Film <span className="text-danger">*</span></span>
             </label>
-            <span className="text-xs font-mono text-muted/80">
+            <span className="text-xs font-mono font-bold text-text">
               {rating ? `${rating} / 10` : 'Belum dipilih'}
             </span>
           </div>
-          <p className="text-xs text-muted/70 -mt-1">
+          <p className="text-xs text-muted/80 -mt-1">
             Penilaian estetika personal (1 mengecewakan · 5 lumayan · 10 mahakarya personal).
           </p>
           <NumberScale
@@ -113,16 +118,17 @@ export function CatatView({ movie }: CatatViewProps) {
         </section>
 
         {/* Content Potential 1-10 Section */}
-        <section className="panel space-y-3 bg-surface-elevated/60">
+        <section className="panel space-y-3 bg-surface-elevated/70 border border-line rounded-2xl p-5 shadow-sm">
           <div className="flex items-baseline justify-between">
-            <label className="!mt-0 text-xs font-mono uppercase tracking-wider text-muted">
-              2. Potensi Menjadi Konten <span className="text-danger">*</span>
+            <label className="!mt-0 text-xs font-pixel uppercase tracking-wider text-muted flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-neon-magenta" />
+              <span>2. Potensi Menjadi Konten <span className="text-danger">*</span></span>
             </label>
-            <span className="text-xs font-mono text-accent font-semibold">
+            <span className="text-xs font-mono font-bold text-neon-magenta">
               {contentPotential ? `${contentPotential} / 10` : 'Belum dipilih'}
             </span>
           </div>
-          <p className="text-xs text-muted/70 -mt-1">
+          <p className="text-xs text-muted/80 -mt-1">
             Seberapa kaya film ini untuk dibedah (1 sulit diolah · 5 menarik · 10 bahan emas video essay).
           </p>
           <NumberScale
@@ -133,10 +139,13 @@ export function CatatView({ movie }: CatatViewProps) {
         </section>
 
         {/* Qualitative Research Notes */}
-        <section className="panel space-y-5 bg-surface/50">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-muted border-b border-line/50 pb-2">
-            3. Analisis & Catatan Penulis
-          </h2>
+        <section className="panel space-y-5 bg-surface/50 border border-line rounded-2xl p-5 sm:p-6 shadow-sm">
+          <div className="flex items-center gap-2 border-b border-line pb-2.5">
+            <Badge variant="analysis" size="xs">DOSSIER</Badge>
+            <h2 className="text-xs font-pixel uppercase tracking-wider text-lavender">
+              3. Analisis & Catatan Penulis
+            </h2>
+          </div>
 
           {/* Theme */}
           <div className="space-y-1.5">
@@ -149,7 +158,7 @@ export function CatatView({ movie }: CatatViewProps) {
               placeholder="Misal: kesepian urban, trauma masa kecil, rekonstruksi memori..."
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
-              className="text-sm bg-bg border-line"
+              className="text-sm bg-surface border-line rounded-lg"
             />
           </div>
 
@@ -164,7 +173,7 @@ export function CatatView({ movie }: CatatViewProps) {
               placeholder="Sekuens visual, dialog, atau shot mana yang terus membekas?"
               value={scene}
               onChange={(e) => setScene(e.target.value)}
-              className="text-sm bg-bg border-line"
+              className="text-sm bg-surface border-line rounded-lg"
             />
           </div>
 
@@ -179,7 +188,7 @@ export function CatatView({ movie }: CatatViewProps) {
               placeholder="Pertanyaan utama, premis hook, atau argumen inti untuk video essay..."
               value={angle}
               onChange={(e) => setAngle(e.target.value)}
-              className="text-sm bg-bg border-line"
+              className="text-sm bg-surface border-line rounded-lg"
             />
           </div>
 
@@ -193,7 +202,7 @@ export function CatatView({ movie }: CatatViewProps) {
               placeholder="Tuliskan pemikiran mengalir, kutipan dialog, atau asosiasi dengan film lain..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="text-sm bg-bg border-line min-h-[140px] leading-relaxed"
+              className="text-sm bg-surface border-line rounded-lg min-h-[140px] leading-relaxed"
             />
           </div>
         </section>
@@ -203,7 +212,7 @@ export function CatatView({ movie }: CatatViewProps) {
           <button
             type="submit"
             disabled={submitting}
-            className="btn primary w-full py-3 text-sm font-semibold shadow-md shadow-accent/20 cursor-pointer"
+            className="btn primary w-full py-3.5 text-sm font-semibold shadow-lg shadow-primary/25 cursor-pointer disabled:opacity-50"
           >
             {submitting ? 'Menyimpan Catatan Riset...' : 'Simpan Catatan Riset'}
           </button>

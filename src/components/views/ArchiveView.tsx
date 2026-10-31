@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Movie } from '@/types';
 import { PosterCover } from '@/components/PosterCover';
 import { EmptyState } from '@/components/EmptyState';
+import { Badge } from '@/components/Badge';
+import { FilmStripDivider } from '@/components/FilmStripDivider';
 
 interface ArchiveViewProps {
   initialMovies?: Movie[];
@@ -13,6 +15,8 @@ interface ArchiveViewProps {
 export function ArchiveView({ initialMovies = [] }: ArchiveViewProps) {
   const [movies] = useState<Movie[]>(initialMovies);
 
+  // Filter movies that are watched AND have creative research logs,
+  // sorted by content potential descending.
   const archivedMovies = useMemo(() => {
     return movies
       .filter((m) => m.done && m.log)
@@ -20,148 +24,205 @@ export function ArchiveView({ initialMovies = [] }: ArchiveViewProps) {
   }, [movies]);
 
   return (
-    <div className="space-y-8 sm:space-y-10">
-      {/* Editorial Header */}
-      <section className="border-b border-line/60 pb-6">
-        <div className="flex items-center gap-2 mb-2 text-xs font-mono tracking-widest uppercase text-muted/70">
-          <span>The Writer&apos;s Room</span>
-          <span className="text-muted/30">/</span>
-          <span>Bank Ide & Riset</span>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-          <h1 className="font-serif font-bold text-3xl sm:text-4xl text-text tracking-tight">
-            Arsip Creator
-          </h1>
+    <div className="space-y-8 sm:space-y-10 pb-8">
+      {/* ─────────────────────────────────────────────────────────────
+          EDITORIAL ARCHIVE HEADER (Writer's Room Dossier)
+         ───────────────────────────────────────────────────────────── */}
+      <section className="border-b border-line/60 pb-6 sm:pb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            {/* OSD Status Bar */}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <Badge variant="analysis" size="xs">
+                DOSSIER ARCHIVE
+              </Badge>
+              <span className="text-[10px] font-pixel text-muted tracking-wider uppercase">
+                THE WRITER&apos;S ROOM
+              </span>
+              <span className="text-[10px] font-pixel text-muted/60 tracking-wider ml-auto hidden sm:inline" aria-hidden="true">
+                BERUANG SASTRA // RESEARCH LOG
+              </span>
+            </div>
+
+            <h1 className="font-serif font-bold text-3xl sm:text-4xl text-text tracking-tight">
+              Arsip Creator
+            </h1>
+            <p className="text-muted text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
+              Koleksi film yang telah selesai ditonton, diprioritaskan berdasarkan potensi konten tertinggi
+              untuk bahan video essay, ulasan mendalam, dan riset naratif Beruang Sastra.
+            </p>
+          </div>
+
           {archivedMovies.length > 0 && (
-            <span className="text-xs font-mono text-muted">
-              {archivedMovies.length} film dengan catatan riset
-            </span>
+            <div className="flex-none self-start sm:self-auto bg-surface/80 px-3.5 py-2 rounded-xl border border-line shadow-xs flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-neon-magenta animate-pulse" />
+              <span className="font-pixel text-[11px] text-text font-bold">
+                {archivedMovies.length} ARSIP TERSIMPAN
+              </span>
+            </div>
           )}
         </div>
-        <p className="text-muted text-sm mt-1 max-w-xl leading-relaxed">
-          Koleksi film yang telah selesai ditonton, diprioritaskan berdasarkan potensi konten tertinggi untuk bahan video essay dan ulasan Beruang Sastra.
-        </p>
       </section>
 
-      {/* Archive Dossiers List */}
-      <section>
-        {archivedMovies.length > 0 ? (
-          <div className="space-y-5">
-            {archivedMovies.map((movie) => (
-              <article
-                key={movie.id}
-                className="group panel bg-surface/50 border border-line hover:border-line-subtle transition-all duration-200 rounded-xl p-4 sm:p-6"
-              >
-                <div className="flex flex-col sm:flex-row gap-5 items-start">
-                  {/* Poster Thumbnail */}
-                  <Link
-                    href={`/bank/${movie.id}`}
-                    className="w-24 sm:w-28 flex-none self-start focus-visible:ring-2 focus-visible:ring-accent rounded-lg overflow-hidden group-hover:scale-[1.02] transition-transform duration-200"
-                  >
-                    <PosterCover
-                      title={movie.title}
-                      identifier={movie.tmdbId || movie.id}
-                      done={movie.done}
-                      year={movie.year}
-                      posterUrl={movie.posterUrl}
-                      className="w-full"
-                    />
-                  </Link>
+      {/* Film Strip Divider */}
+      <FilmStripDivider label="RESEARCH LOGS // HIGH POTENTIAL" />
 
-                  {/* Content / Research Record */}
-                  <div className="flex-1 min-w-0 space-y-3.5">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+      {/* ─────────────────────────────────────────────────────────────
+          ARCHIVE DOSSIERS LIST (Editorial Research Catalog)
+         ───────────────────────────────────────────────────────────── */}
+      <section aria-label="Daftar Arsip Riset Film">
+        {archivedMovies.length > 0 ? (
+          <div className="space-y-6">
+            {archivedMovies.map((movie, index) => {
+              const archiveCode = `DOSSIER #0${index + 1}`;
+
+              return (
+                <article
+                  key={movie.id}
+                  className="card p-5 sm:p-7 flex flex-col md:flex-row gap-6 items-start hover:border-primary/40 transition-all duration-200"
+                >
+                  {/* Poster Thumbnail Showcase */}
+                  <div className="w-28 sm:w-36 flex-none self-start">
+                    <Link
+                      href={`/bank/${movie.id}`}
+                      className="block rounded-xl overflow-hidden shadow-lg group/cover focus-visible:outline-2 focus-visible:outline-primary"
+                      aria-label={`Buka detail film ${movie.title}`}
+                    >
+                      <PosterCover
+                        title={movie.title}
+                        identifier={movie.tmdbId || movie.id}
+                        done={movie.done}
+                        year={movie.year}
+                        posterUrl={movie.posterUrl}
+                        className="w-full transition-transform duration-300 group-hover/cover:scale-[1.02]"
+                      />
+                    </Link>
+                  </div>
+
+                  {/* Research Dossier Content */}
+                  <div className="flex-1 min-w-0 space-y-4 w-full">
+                    {/* Header Row: Dossier Code, Title & Ratings */}
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div>
-                        <Link
-                          href={`/bank/${movie.id}`}
-                          className="font-serif font-bold text-xl sm:text-2xl text-text hover:text-accent transition-colors leading-tight inline-block"
-                        >
-                          {movie.title}
-                        </Link>
-                        <div className="text-xs font-mono text-muted mt-1 flex items-center gap-2">
-                          {movie.year && <span>{movie.year}</span>}
+                        <div className="flex items-center gap-2 text-[10px] font-pixel text-primary-bright mb-1">
+                          <span>{archiveCode}</span>
+                          <span>•</span>
+                          <span>{movie.year || 'N/A'}</span>
                           {movie.runtime && (
                             <>
-                              <span className="text-line">·</span>
+                              <span>•</span>
                               <span>{movie.runtime}m</span>
                             </>
                           )}
-                          {movie.moods && movie.moods.length > 0 && (
-                            <>
-                              <span className="text-line">·</span>
-                              <span>{movie.moods.join(', ')}</span>
-                            </>
-                          )}
                         </div>
+
+                        <Link
+                          href={`/bank/${movie.id}`}
+                          className="font-serif font-bold text-xl sm:text-2xl text-text hover:text-primary-bright transition-colors leading-tight inline-block"
+                        >
+                          {movie.title}
+                        </Link>
+
+                        {/* Mood Tags */}
+                        {movie.moods && movie.moods.length > 0 && (
+                          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                            {movie.moods.map((mood) => (
+                              <span
+                                key={mood}
+                                className="text-[10px] font-pixel px-2 py-0.5 rounded-md bg-surface-elevated text-lavender border border-line/60"
+                              >
+                                #{mood}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Ratings */}
+                      {/* Score Badges */}
                       <div className="flex items-center gap-2 self-start flex-none">
-                        <div className="bg-bg/80 border border-line px-2.5 py-1 rounded text-xs font-mono text-muted">
-                          Rating <strong className="text-text">{movie.log?.rating}</strong>/10
+                        <div className="bg-surface-elevated border border-line px-3 py-1.5 rounded-xl text-xs font-mono text-muted">
+                          Rating <strong className="text-text font-bold">{movie.log?.rating}</strong>/10
                         </div>
-                        <div className="bg-accent/10 border border-accent/30 px-2.5 py-1 rounded text-xs font-mono text-accent font-medium">
-                          Potensi <strong className="text-accent">{movie.log?.contentPotential}</strong>/10
+                        <div className="bg-neon-magenta/15 border border-neon-magenta/35 px-3 py-1.5 rounded-xl text-xs font-mono text-neon-magenta font-semibold shadow-xs">
+                          Potensi <strong className="text-neon-magenta font-bold">{movie.log?.contentPotential}</strong>/10
                         </div>
                       </div>
                     </div>
 
-                    {/* Creative Research Fields */}
-                    <div className="space-y-2.5 pt-1">
+                    {/* Editorial Creative Research Fields */}
+                    <div className="space-y-3 pt-1">
+                      {/* Angle Konten Highlight */}
                       {movie.log?.angle && (
-                        <div className="bg-bg/40 p-3 rounded-lg border border-line/40">
-                          <span className="text-[11px] font-mono uppercase tracking-wider text-accent block mb-0.5">
-                            Angle Konten
+                        <div className="bg-surface-elevated/70 p-4 rounded-xl border border-line-subtle shadow-xs">
+                          <span className="text-[10px] font-pixel uppercase tracking-wider text-neon-magenta block mb-1">
+                            ANGLE KONTEN
                           </span>
-                          <p className="text-text text-sm font-medium leading-snug">
-                            {movie.log.angle}
+                          <p className="text-text text-sm sm:text-[15px] font-medium leading-snug">
+                            &ldquo;{movie.log.angle}&rdquo;
                           </p>
                         </div>
                       )}
 
-                      {movie.log?.theme && (
-                        <div className="text-xs text-muted">
-                          <span className="font-mono uppercase tracking-wider text-muted/70">Tema: </span>
-                          <span className="text-text-subtle">{movie.log.theme}</span>
-                        </div>
-                      )}
+                      {/* Theme and Scene Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        {movie.log?.theme && (
+                          <div className="p-3 rounded-lg bg-surface/50 border border-line/50">
+                            <span className="font-pixel text-[9px] uppercase tracking-wider text-muted block mb-0.5">
+                              TEMA SENTRAL:
+                            </span>
+                            <span className="text-text-subtle font-medium text-xs sm:text-[13px]">
+                              {movie.log.theme}
+                            </span>
+                          </div>
+                        )}
 
-                      {movie.log?.scene && (
-                        <div className="text-xs text-muted">
-                          <span className="font-mono uppercase tracking-wider text-muted/70">Adegan Nempel: </span>
-                          <span className="text-text-subtle">{movie.log.scene}</span>
-                        </div>
-                      )}
+                        {movie.log?.scene && (
+                          <div className="p-3 rounded-lg bg-surface/50 border border-line/50">
+                            <span className="font-pixel text-[9px] uppercase tracking-wider text-muted block mb-0.5">
+                              ADEGAN MEMBEKAS:
+                            </span>
+                            <span className="text-text-subtle font-medium text-xs sm:text-[13px]">
+                              {movie.log.scene}
+                            </span>
+                          </div>
+                        )}
+                      </div>
 
+                      {/* Analytical Notes */}
                       {movie.log?.notes && (
-                        <p className="text-xs sm:text-sm text-muted line-clamp-2 leading-relaxed pt-1">
-                          {movie.log.notes}
-                        </p>
+                        <div className="pt-1">
+                          <p className="text-xs sm:text-sm text-muted line-clamp-3 leading-relaxed">
+                            {movie.log.notes}
+                          </p>
+                        </div>
                       )}
                     </div>
 
-                    {/* Footer Actions */}
-                    <div className="pt-2 flex items-center justify-between text-xs">
+                    {/* Footer Action Links */}
+                    <div className="pt-3 border-t border-line/40 flex items-center justify-between text-xs">
                       <Link
                         href={`/bank/${movie.id}/catat`}
-                        className="text-muted hover:text-accent font-medium transition-colors"
+                        className="text-muted hover:text-text font-medium transition-colors flex items-center gap-1.5"
                       >
-                        Edit Catatan
+                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 stroke-current fill-none stroke-[2]" aria-hidden="true">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        <span>Edit Catatan Riset</span>
                       </Link>
+
                       <Link
                         href={`/bank/${movie.id}`}
-                        className="text-accent hover:underline font-medium inline-flex items-center gap-1"
+                        className="text-primary-bright font-semibold hover:underline inline-flex items-center gap-1"
                       >
-                        <span>Buka Dossier Film</span>
-                        <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current" aria-hidden="true">
-                          <path fillRule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z" />
-                        </svg>
+                        <span>Buka Dossier Lengkap</span>
+                        <span aria-hidden="true">→</span>
                       </Link>
                     </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         ) : (
           <EmptyState
@@ -169,6 +230,7 @@ export function ArchiveView({ initialMovies = [] }: ArchiveViewProps) {
             description="Setelah menonton film, catat rating, angle konten, dan adegan yang membekas untuk membangun arsip riset lu."
             actionText="Jelajahi Movie Bank"
             actionHref="/bank"
+            primaryAction
           />
         )}
       </section>
