@@ -180,11 +180,11 @@ export function JournalCard({ entry, className = '', showActions = true }: Journ
           <span>{minutes} mnt baca</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {showActions && (
             <Link
               href={`/journal/${entry.id}/edit`}
-              className="text-muted hover:text-primary-bright transition-colors font-medium text-xs px-2 py-1 rounded hover:bg-surface-elevated"
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-muted hover:text-primary-bright transition-colors font-medium text-xs px-2.5 py-1.5 rounded-lg hover:bg-surface-elevated active:scale-95"
               title="Edit Jurnal"
             >
               Edit
@@ -193,11 +193,11 @@ export function JournalCard({ entry, className = '', showActions = true }: Journ
 
           <Link
             href={`/journal/${entry.id}`}
-            className="inline-flex items-center gap-1 font-medium text-primary-bright hover:text-lavender transition-colors"
+            className="min-h-[44px] inline-flex items-center gap-1 font-medium text-primary-bright hover:text-lavender transition-colors px-2.5 py-1.5 rounded-lg hover:bg-surface-elevated active:scale-95"
           >
             <span>{entry.isDraft ? 'Lanjutkan' : 'Buka'}</span>
             <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-current transition-transform group-hover:translate-x-0.5" aria-hidden="true">
-              <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z" />
+              <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1 0-1.06z" />
             </svg>
           </Link>
         </div>

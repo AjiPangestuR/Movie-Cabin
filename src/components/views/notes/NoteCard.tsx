@@ -97,7 +97,7 @@ export function NoteCard({
               onClick={handlePinClick}
               aria-label={note.isPinned ? 'Lepas sematan' : 'Sematkan catatan'}
               title={note.isPinned ? 'Lepas sematan' : 'Sematkan catatan'}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+              className={`p-2 rounded-lg border transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center active:scale-95 ${
                 note.isPinned
                   ? 'bg-amber/20 text-amber border-amber/40 hover:bg-amber/30'
                   : 'bg-surface text-muted/60 border-line hover:text-amber hover:border-amber/30'
@@ -150,7 +150,7 @@ export function NoteCard({
       <div className="pt-3 border-t border-line/50 flex items-center justify-between gap-2 text-xs">
         <Link
           href={`/notes/${note.id}`}
-          className="text-xs font-medium text-primary-bright hover:text-lavender transition-colors inline-flex items-center gap-1"
+          className="min-h-[44px] text-xs font-medium text-primary-bright hover:text-lavender transition-colors inline-flex items-center gap-1 active:scale-95"
         >
           <span>Buka Catatan</span>
           <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current transition-transform group-hover:translate-x-0.5" aria-hidden="true">
@@ -168,7 +168,7 @@ export function NoteCard({
             confirmText={isPending ? '...' : 'Hapus'}
             cancelText="Batal"
             triggerText="Hapus"
-            className="text-[11px] py-0.5 px-2"
+            className="text-[11px] py-1.5 px-2.5 min-h-[36px]"
           />
         )}
       </div>

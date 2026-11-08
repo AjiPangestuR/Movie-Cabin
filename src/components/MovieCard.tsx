@@ -56,9 +56,17 @@ export function MovieCard({
         </div>
 
         {movie.log && (
-          <div className="mt-2 pt-1.5 border-t border-line/40 flex items-center justify-between text-[11px] text-muted">
-            <span>Rating {movie.log.rating}/10</span>
-            <span className="text-neon-magenta font-semibold">Potensi {movie.log.contentPotential}/10</span>
+          <div className="mt-2 pt-1.5 border-t border-line/40 flex items-center justify-between text-[10px] sm:text-[11px] text-muted gap-1 min-w-0 whitespace-nowrap">
+            <span className="truncate flex items-center gap-1 whitespace-nowrap">
+              <span className="hidden min-[380px]:inline text-muted/70">Rating</span>
+              <span className="text-text font-bold">★ {movie.log.rating}</span>
+              <span className="text-muted/50 hidden min-[380px]:inline text-[10px]">/10</span>
+            </span>
+            <span className="text-neon-magenta font-semibold truncate text-right flex items-center gap-1 justify-end whitespace-nowrap">
+              <span className="hidden min-[380px]:inline text-neon-magenta/70 font-normal">Potensi</span>
+              <span className="font-bold">⚡ {movie.log.contentPotential}</span>
+              <span className="text-neon-magenta/50 hidden min-[380px]:inline text-[10px]">/10</span>
+            </span>
           </div>
         )}
       </div>

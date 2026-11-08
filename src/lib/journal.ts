@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import {
   type JournalEntry,
   type JournalMovieRelation,
+  type RelatedJournalSummary,
   type CreateJournalInput,
   type UpdateJournalInput,
   type JournalListFilter,
@@ -550,4 +551,65 @@ export async function updateResonanceNote(
   revalidatePath('/journal');
 
   return mapRelationRow(data);
+}
+
+
+/**
+ * 5. Mendapatkan ringkasan entri jurnal kurator yang ditautkan pada suatu film.
+ * Hanya mengembalikan entri yang bukan draf milik pengguna terautentikasi.
+ */
+export async function getRelatedJournalsForMovie(
+  movieId: string
+): Promise<RelatedJournalSummary[]> {
+  if (!movieId || !isValidUuid(movieId)) {
+    return [];
+  }
+
+  try {
+    const { supabase, user } = await getAuthenticatedUser();
+
+    const { data, error } = await supabase
+      .from('journal_movie_relations')
+      .select(`
+        id,
+        resonance_note,
+        journal_entries (
+          id,
+          user_id,
+          title,
+          entry_date,
+          is_draft
+        )
+      `)
+      .eq('movie_id', movieId)
+      .eq('user_id', user.id);
+
+    if (error || !data) {
+      return [];
+    }
+
+    const summaries: RelatedJournalSummary[] = [];
+    for (const item of data) {
+      const entry = item.journal_entries as unknown as {
+        id: string;
+        user_id: string;
+        title: string;
+        entry_date: string;
+        is_draft: boolean;
+      } | null;
+
+      if (entry && !entry.is_draft && entry.user_id === user.id) {
+        summaries.push({
+          id: entry.id,
+          title: entry.title,
+          entryDate: entry.entry_date,
+          resonanceNote: item.resonance_note || null,
+        });
+      }
+    }
+
+    return summaries;
+  } catch {
+    return [];
+  }
 }

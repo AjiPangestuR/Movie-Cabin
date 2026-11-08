@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { MovieDetailView } from '@/components/views/MovieDetailView';
 import { getMovie, isValidUuid } from '@/lib/movies';
 import { listMoods } from '@/lib/moods';
+import { getRelatedJournalsForMovie } from '@/lib/journal';
 import { getTmdbMovieDetail, isTmdbConfigured } from '@/lib/tmdb';
 
 interface MovieDetailPageProps {
@@ -28,7 +29,11 @@ export default async function MovieDetailPage({ params }: MovieDetailPageProps) 
     notFound();
   }
 
-  const [movie, moods] = await Promise.all([getMovie(id), listMoods()]);
+  const [movie, moods, relatedJournals] = await Promise.all([
+    getMovie(id),
+    listMoods(),
+    getRelatedJournalsForMovie(id),
+  ]);
   if (!movie) {
     notFound();
   }
@@ -51,6 +56,7 @@ export default async function MovieDetailPage({ params }: MovieDetailPageProps) 
       initialMovie={movie}
       initialMoods={moods.map((m) => m.name)}
       posterUrl={posterUrl}
+      relatedJournals={relatedJournals}
     />
   );
 }

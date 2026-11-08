@@ -149,15 +149,17 @@ export function NoteEditorView({
   return (
     <div
       data-testid="note-editor-view"
-      className="max-w-[760px] mx-auto space-y-8 pb-24"
+      className="max-w-[760px] mx-auto space-y-6 sm:space-y-8 pb-16"
     >
       {/* ─────────────────────────────────────────────────────────────
-          TOP NAVIGATION & STATUS
+          TOP TOOLBAR & MOBILE ACTION DOCK (Keyboard-Safe)
+          Mobile top action button allows 1-tap saving without scrolling
+          and without keyboard collision.
          ───────────────────────────────────────────────────────────── */}
-      <nav className="flex items-center justify-between gap-4 border-b border-line/60 pb-4">
+      <nav className="flex items-center justify-between gap-3 border-b border-line/60 pb-3.5 sm:pb-4">
         <Link
           href="/notes"
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-muted hover:text-text transition-colors"
+          className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-muted hover:text-text transition-colors"
         >
           <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
             <path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 1.06L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06z" />
@@ -165,14 +167,29 @@ export function NoteEditorView({
           <span>Kembali ke Catatan</span>
         </Link>
 
-        <div className="flex items-center gap-2 text-xs text-muted">
+        {/* Mobile Top Action Button */}
+        <div className="flex sm:hidden items-center gap-2">
+          <button
+            type="button"
+            disabled={isPending || !content.trim()}
+            onClick={handleSave}
+            className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-primary to-neon-magenta text-white text-xs font-semibold shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
+            aria-label="Simpan Catatan"
+            title="Simpan Catatan"
+          >
+            {isPending ? '...' : 'Simpan'}
+          </button>
+        </div>
+
+        {/* Desktop Status Info */}
+        <div className="hidden sm:flex items-center gap-2 text-xs text-muted">
           <span className="text-[10px] font-pixel text-muted/70 tracking-wider uppercase">
             {mode === 'create' ? 'TULIS BARU' : 'EDIT CATATAN'}
           </span>
           {initialNote && (
             <>
               <span>•</span>
-              <span className="font-mono text-[11px] hidden sm:inline">
+              <span className="font-mono text-[11px]">
                 {formatNoteDate(initialNote.updatedAt)}
               </span>
             </>
@@ -183,7 +200,7 @@ export function NoteEditorView({
       {/* ─────────────────────────────────────────────────────────────
           CANVAS MENULIS CATATAN
          ───────────────────────────────────────────────────────────── */}
-      <section className="space-y-5">
+      <section className="space-y-4 sm:space-y-5">
         {/* Title Input (Opsional) */}
         <div>
           <label htmlFor="note-title" className="sr-only">
@@ -198,7 +215,7 @@ export function NoteEditorView({
             placeholder="Judul Catatan (opsional)..."
             maxLength={200}
             autoFocus={mode === 'create'}
-            className="w-full bg-transparent font-serif font-bold text-2xl sm:text-3xl text-text placeholder:text-muted/40 focus:outline-hidden border-b border-line/60 focus:border-primary/60 transition-colors pb-2"
+            className="w-full bg-transparent font-serif font-bold text-xl sm:text-3xl text-text placeholder:text-muted/40 focus:outline-hidden border-b border-line/60 focus:border-primary/60 transition-colors pb-2"
           />
         </div>
 
@@ -210,12 +227,12 @@ export function NoteEditorView({
           <textarea
             id="note-content"
             data-testid="note-content-input"
-            rows={10}
+            rows={9}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Tuliskan ide, kutipan, potongan dialog, atau inspirasi singkatmu..."
             maxLength={10000}
-            className="w-full bg-transparent font-sans text-base sm:text-lg text-text-subtle placeholder:text-muted/40 leading-relaxed focus:outline-hidden resize-y min-h-[260px] p-0"
+            className="w-full bg-transparent font-sans text-base sm:text-lg text-text-subtle placeholder:text-muted/40 leading-relaxed focus:outline-hidden resize-y min-h-[220px] sm:min-h-[280px] p-0"
           />
         </div>
 
@@ -235,7 +252,7 @@ export function NoteEditorView({
         </div>
 
         {/* Pin Status Toggle */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
             <label
               htmlFor="note-pin-toggle"
@@ -254,7 +271,7 @@ export function NoteEditorView({
             type="button"
             onClick={() => setIsPinned((prev) => !prev)}
             aria-pressed={isPinned}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all duration-150 cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all duration-150 cursor-pointer flex items-center gap-1.5 flex-none active:scale-95 ${
               isPinned
                 ? 'bg-amber/20 text-amber border-amber/40 font-semibold shadow-xs'
                 : 'bg-surface text-muted border-line hover:text-text'
@@ -285,7 +302,7 @@ export function NoteEditorView({
             <button
               type="button"
               onClick={() => handleAddTag(tagInput)}
-              className="px-3 py-2 rounded-xl border border-line bg-surface text-xs font-medium text-text hover:bg-surface-elevated transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl border border-line bg-surface text-xs font-medium text-text hover:bg-surface-elevated transition-colors cursor-pointer flex-none"
             >
               Tambah Tag
             </button>
@@ -315,7 +332,7 @@ export function NoteEditorView({
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          BOTTOM ACTIONS BAR
+          BOTTOM ACTIONS BAR (Natural document flow — no keyboard collision)
          ───────────────────────────────────────────────────────────── */}
       <footer className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-line/60">
         <Link
@@ -343,7 +360,7 @@ export function NoteEditorView({
             type="button"
             disabled={isPending || !content.trim()}
             onClick={handleSave}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-neon-magenta text-white text-xs sm:text-sm font-semibold shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/35 hover:opacity-95 transition-all duration-200 active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-neon-magenta text-white text-xs sm:text-sm font-semibold shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/35 hover:opacity-95 transition-all duration-200 active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isPending ? (
               <span>Menyimpan...</span>

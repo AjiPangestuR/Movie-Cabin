@@ -210,22 +210,49 @@ export function JournalEditorView({
   };
 
   return (
-    <div className="max-w-[820px] mx-auto space-y-8 pb-24" data-testid="journal-editor-view">
+    <div className="max-w-[820px] mx-auto space-y-6 sm:space-y-8 pb-20 sm:pb-24" data-testid="journal-editor-view">
       {/* ─────────────────────────────────────────────────────────────
-          TOP TOOLBAR & STATUS
+          TOP TOOLBAR & MOBILE ACTION BAR (Keyboard-Safe)
+          On mobile: action buttons are docked here so the keyboard
+          never causes bottom collision with active typing cursor.
          ───────────────────────────────────────────────────────────── */}
-      <nav className="flex items-center justify-between gap-4 border-b border-line/60 pb-4">
+      <nav className="flex items-center justify-between gap-3 border-b border-line/60 pb-3.5 sm:pb-4">
         <Link
           href={mode === 'edit' && initialJournal ? `/journal/${initialJournal.id}` : '/journal'}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-muted hover:text-text transition-colors"
+          className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-muted hover:text-text transition-colors"
         >
           <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
             <path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 1.06L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06z" />
           </svg>
-          <span>{mode === 'edit' ? 'Kembali ke Entri' : 'Batal & Kembali ke Jurnal'}</span>
+          <span>{mode === 'edit' ? 'Kembali ke Entri' : 'Batal'}</span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        {/* Mobile Top Actions: 1-Tap Save & Publish without keyboard collision */}
+        <div className="flex sm:hidden items-center gap-2">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handleSave(true)}
+            className="px-2.5 py-1.5 rounded-lg border border-line bg-surface text-xs font-medium text-text hover:bg-surface-elevated active:scale-95 disabled:opacity-50 cursor-pointer"
+            title="Simpan Draf"
+            aria-label="Simpan Draf Jurnal"
+          >
+            {isPending ? '...' : 'Draf'}
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handleSave(false)}
+            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-neon-magenta text-white text-xs font-semibold shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
+            title="Publikasikan Jurnal"
+            aria-label="Publikasikan Jurnal"
+          >
+            {isPending ? '...' : 'Terbitkan'}
+          </button>
+        </div>
+
+        {/* Desktop Header Info */}
+        <div className="hidden sm:flex items-center gap-2">
           <span className="text-[10px] font-pixel text-muted/70 tracking-wider uppercase">
             {mode === 'create' ? 'TULIS BARU' : 'MODE EDIT'}
           </span>
@@ -235,6 +262,14 @@ export function JournalEditorView({
           </span>
         </div>
       </nav>
+
+      {/* Mobile Word Count Strip */}
+      <div className="flex sm:hidden items-center justify-between text-[11px] font-mono text-muted/70 px-1 -mt-3 sm:mt-0">
+        <span className="font-pixel text-[9px] uppercase tracking-wider text-muted/60">
+          {mode === 'create' ? 'TULIS BARU' : 'MODE EDIT'}
+        </span>
+        <span>{words} kata • {minutes} mnt baca</span>
+      </div>
 
       {/* ─────────────────────────────────────────────────────────────
           DISTRACTION-FREE WRITING CANVAS
@@ -264,11 +299,11 @@ export function JournalEditorView({
           </label>
           <textarea
             id="journal-content"
-            rows={14}
+            rows={12}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Tuliskan renungan batin, resonansi sinema, atau percakapan yang tertinggal di kepala..."
-            className="w-full bg-transparent font-sans text-base sm:text-lg text-text-subtle placeholder:text-muted/40 leading-relaxed focus:outline-hidden resize-y min-h-[360px] p-0"
+            className="w-full bg-transparent font-sans text-base sm:text-lg text-text-subtle placeholder:text-muted/40 leading-relaxed focus:outline-hidden resize-y min-h-[300px] sm:min-h-[360px] p-0"
           />
         </div>
       </section>
@@ -280,19 +315,19 @@ export function JournalEditorView({
         <button
           type="button"
           onClick={() => setIsMetaDrawerOpen((prev) => !prev)}
-          className="w-full px-5 py-3.5 flex items-center justify-between text-left hover:bg-surface-elevated/40 transition-colors cursor-pointer select-none border-b border-line/40"
+          className="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between text-left hover:bg-surface-elevated/40 transition-colors cursor-pointer select-none border-b border-line/40"
         >
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-pixel text-primary-bright uppercase tracking-wider">
-              KONTEKS & METADATA JURNAL
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <span className="text-[10px] font-pixel text-primary-bright uppercase tracking-wider flex-none">
+              KONTEKS & METADATA
             </span>
-            <span className="text-xs text-muted">
+            <span className="text-xs text-muted truncate">
               ({entryDate} {mood ? `• ${mood}` : ''} {tags.length > 0 ? `• ${tags.length} tag` : ''})
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-muted">
-            <span>{isMetaDrawerOpen ? 'Sembunyikan' : 'Buka Pengaturan'}</span>
+          <div className="flex items-center gap-1.5 text-xs text-muted flex-none ml-2">
+            <span className="hidden sm:inline">{isMetaDrawerOpen ? 'Sembunyikan' : 'Buka Pengaturan'}</span>
             <svg
               viewBox="0 0 16 16"
               className={`w-3.5 h-3.5 fill-current transition-transform duration-200 ${
@@ -306,7 +341,7 @@ export function JournalEditorView({
         </button>
 
         {isMetaDrawerOpen && (
-          <div className="p-5 space-y-6">
+          <div className="p-4 sm:p-5 space-y-5 sm:space-y-6">
             {/* 1. Date Picker */}
             <div>
               <label htmlFor="journal-entry-date" className="block text-xs font-medium text-muted mb-1.5">
@@ -331,7 +366,7 @@ export function JournalEditorView({
                   <button
                     type="button"
                     onClick={() => setMood(null)}
-                    className="text-[11px] text-muted hover:text-text cursor-pointer"
+                    className="text-[11px] text-neon-magenta hover:underline cursor-pointer"
                   >
                     Reset Mood
                   </button>
@@ -407,20 +442,22 @@ export function JournalEditorView({
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          STICKY BOTTOM ACTION BAR
+          ACTION BAR (Document flow on mobile, sticky on desktop)
+          On mobile: relative position prevents virtual keyboard collision.
+          On desktop: sticky bottom-4 maintains classic elevated toolbar.
          ───────────────────────────────────────────────────────────── */}
-      <div className="sticky bottom-4 z-20 p-4 rounded-2xl border border-line bg-surface-elevated/95 backdrop-blur-md shadow-2xl flex flex-wrap items-center justify-between gap-3">
+      <div className="relative mt-8 sm:sticky sm:bottom-4 z-20 p-4 rounded-2xl border border-line bg-surface-elevated/95 backdrop-blur-md shadow-2xl flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs text-muted">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>Editor Aktif</span>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-end">
           <button
             type="button"
             disabled={isPending}
             onClick={() => handleSave(true)}
-            className="px-4 py-2.5 rounded-xl border border-line bg-surface text-xs sm:text-sm font-medium text-text hover:bg-surface-elevated hover:border-line-subtle transition-all duration-150 active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border border-line bg-surface text-xs sm:text-sm font-medium text-text hover:bg-surface-elevated hover:border-line-subtle transition-all duration-150 active:scale-95 disabled:opacity-50 cursor-pointer text-center"
           >
             {isPending ? 'Menyimpan...' : 'Simpan Draf'}
           </button>
@@ -429,7 +466,7 @@ export function JournalEditorView({
             type="button"
             disabled={isPending}
             onClick={() => handleSave(false)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-neon-magenta text-white text-xs sm:text-sm font-semibold shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/35 hover:opacity-95 transition-all duration-200 active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-neon-magenta text-white text-xs sm:text-sm font-semibold shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/35 hover:opacity-95 transition-all duration-200 active:scale-95 disabled:opacity-50 cursor-pointer text-center"
           >
             {isPending ? (
               <span>Memproses...</span>

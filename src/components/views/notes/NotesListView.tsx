@@ -141,7 +141,7 @@ export function NotesListView({
       return true;
     });
 
-    // Pinned notes always sorted to the top, then updated_at descending
+    // Pinned notes always sorted to the top, then updatedAt descending
     return filtered.sort((a, b) => {
       if (a.isPinned !== b.isPinned) {
         return a.isPinned ? -1 : 1;
@@ -159,15 +159,15 @@ export function NotesListView({
   };
 
   return (
-    <div className="space-y-8 sm:space-y-10 pb-16" data-testid="notes-list-view">
+    <div className="space-y-6 sm:space-y-8 pb-16" data-testid="notes-list-view">
       {/* ─────────────────────────────────────────────────────────────
           EDITORIAL HEADER (Retro VHS Scratchpad Memo Board)
          ───────────────────────────────────────────────────────────── */}
-      <section className="border-b border-line/60 pb-6 sm:pb-8">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+      <section className="border-b border-line/60 pb-5 sm:pb-8">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 sm:gap-6">
           <div>
             {/* OSD Status Bar */}
-            <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <div className="flex items-center gap-2 mb-2.5 sm:mb-3 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-pixel tracking-wider uppercase bg-primary/15 text-primary-bright border border-primary/30">
                 PAPAN IDE
               </span>
@@ -179,10 +179,10 @@ export function NotesListView({
               </span>
             </div>
 
-            <h1 className="font-serif font-bold text-3xl sm:text-4xl text-text tracking-tight">
+            <h1 className="font-serif font-bold text-2xl sm:text-4xl text-text tracking-tight">
               Personal Notes
             </h1>
-            <p className="text-muted text-sm sm:text-base mt-2 max-w-xl leading-relaxed">
+            <p className="text-muted text-xs sm:text-base mt-1.5 sm:mt-2 max-w-xl leading-relaxed">
               Ruang tangkap cepat untuk pikiran, kutipan, potongan dialog, dan fragmen ide kreatif Beruang Sastra yang belum terstruktur.
             </p>
           </div>
@@ -191,7 +191,7 @@ export function NotesListView({
           <div className="flex items-center gap-3 self-start lg:self-auto">
             <Link
               href="/notes/new"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-neon-magenta text-white text-xs sm:text-sm font-semibold shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/35 hover:opacity-95 transition-all duration-200 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-primary to-neon-magenta text-white text-xs sm:text-sm font-semibold shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/35 hover:opacity-95 transition-all duration-200 active:scale-95 cursor-pointer"
             >
               <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
                 <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z" />
@@ -202,13 +202,13 @@ export function NotesListView({
         </div>
 
         {/* Quick Stats Strip */}
-        <div className="mt-6 flex flex-wrap items-center gap-3 text-xs bg-surface/60 p-2 sm:p-2.5 rounded-xl border border-line shadow-xs">
-          <div className="px-3 py-1 rounded-lg bg-surface-elevated/70">
-            <span className="text-muted">Total Catatan: </span>
+        <div className="mt-5 sm:mt-6 flex flex-wrap items-center gap-2 sm:gap-3 text-xs bg-surface/60 p-2 sm:p-2.5 rounded-xl border border-line shadow-xs">
+          <div className="px-2.5 sm:px-3 py-1 rounded-lg bg-surface-elevated/70">
+            <span className="text-muted">Total: </span>
             <span className="font-bold text-text font-mono">{stats.total}</span>
           </div>
           {stats.pinned > 0 && (
-            <div className="px-3 py-1 rounded-lg bg-surface-elevated/70">
+            <div className="px-2.5 sm:px-3 py-1 rounded-lg bg-surface-elevated/70">
               <span className="text-muted">Disematkan: </span>
               <span className="font-bold text-amber font-mono">{stats.pinned}</span>
             </div>
@@ -218,7 +218,7 @@ export function NotesListView({
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="text-xs text-primary-bright hover:underline cursor-pointer"
+                className="text-xs text-neon-magenta hover:underline cursor-pointer font-medium"
               >
                 Reset Semua Filter
               </button>
@@ -230,11 +230,11 @@ export function NotesListView({
       {/* ─────────────────────────────────────────────────────────────
           INLINE QUICK SCRATCHPAD (CAPTURE IDE KILAT)
          ───────────────────────────────────────────────────────────── */}
-      <section className="rounded-2xl border border-line bg-surface/50 p-4 sm:p-5 shadow-xs">
+      <section className="rounded-2xl border border-line bg-surface/50 p-3.5 sm:p-5 shadow-xs">
         <label htmlFor="quick-note-input" className="block text-xs font-medium text-muted mb-2">
           ⚡ Tangkap Ide Kilat
         </label>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <input
             id="quick-note-input"
             data-testid="quick-note-input"
@@ -249,13 +249,13 @@ export function NotesListView({
             }}
             placeholder="Tulis ide atau kutipan singkat di sini... (tekan Enter)"
             maxLength={10000}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-line bg-surface text-text text-xs sm:text-sm placeholder:text-muted/60 focus:outline-hidden focus:border-primary/60 transition-colors"
+            className="flex-1 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-line bg-surface text-text text-xs sm:text-sm placeholder:text-muted/60 focus:outline-hidden focus:border-primary/60 transition-colors"
           />
           <button
             type="button"
             disabled={isPendingQuick || !quickContent.trim()}
             onClick={handleQuickSave}
-            className="px-4 py-2.5 rounded-xl border border-line bg-surface-elevated text-xs sm:text-sm font-semibold text-text hover:border-primary/50 hover:text-primary-bright transition-all disabled:opacity-40 cursor-pointer flex-none"
+            className="px-4 py-2 sm:py-2.5 rounded-xl border border-line bg-surface-elevated text-xs sm:text-sm font-semibold text-text hover:border-primary/50 hover:text-primary-bright transition-all disabled:opacity-40 cursor-pointer flex-none text-center"
           >
             {isPendingQuick ? 'Menyimpan...' : '+ Simpan Cepat'}
           </button>
@@ -263,10 +263,10 @@ export function NotesListView({
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          FILTER BAR (SEARCH, TABS, TAGS)
+          COMPACT FILTER BAR (SEARCH, TABS, TAGS)
          ───────────────────────────────────────────────────────────── */}
-      <section className="space-y-3.5 bg-surface/40 p-4 sm:p-5 rounded-2xl border border-line">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      <section className="space-y-3.5 bg-surface/40 p-3.5 sm:p-5 rounded-2xl border border-line">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
             <svg
@@ -282,16 +282,27 @@ export function NotesListView({
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari dalam catatan atau tag..."
               aria-label="Cari catatan"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-line bg-surface text-text text-xs sm:text-sm placeholder:text-muted/60 focus:outline-hidden focus:border-primary/60 transition-colors"
+              className="w-full pl-10 pr-9 py-2 sm:py-2.5 rounded-xl border border-line bg-surface text-text text-xs sm:text-sm placeholder:text-muted/60 focus:outline-hidden focus:border-primary/60 transition-colors"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-muted hover:text-text rounded-md"
+                title="Hapus kata kunci"
+                aria-label="Hapus kata kunci pencarian"
+              >
+                ✕
+              </button>
+            )}
           </div>
 
           {/* Filter Tabs: Semua vs Disematkan */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-surface border border-line self-start sm:self-auto">
+          <div className="flex items-center gap-1 p-0.5 sm:p-1 rounded-xl bg-surface border border-line self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setFilterTab('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer select-none ${
                 filterTab === 'all'
                   ? 'bg-surface-elevated text-text font-semibold shadow-xs'
                   : 'text-muted hover:text-text'
@@ -302,7 +313,7 @@ export function NotesListView({
             <button
               type="button"
               onClick={() => setFilterTab('pinned')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5 select-none ${
                 filterTab === 'pinned'
                   ? 'bg-amber/20 text-amber font-semibold shadow-xs border border-amber/30'
                   : 'text-muted hover:text-amber'
@@ -316,38 +327,58 @@ export function NotesListView({
           </div>
         </div>
 
-        {/* Tag Filter Chips */}
+        {/* Tag Filter Chips: Horizontal scrolling strip on mobile */}
         {allTags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-line/40">
-            <span className="text-[11px] font-pixel text-muted/70 mr-1 uppercase">
-              TAGS:
-            </span>
-            {allTags.map((tag) => {
-              const isSelected = selectedTag === tag;
-              return (
+          <div className="pt-1.5 border-t border-line/40">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-pixel text-muted/70 uppercase">
+                HASHTAG ({allTags.length})
+              </span>
+              {selectedTag && (
                 <button
-                  key={tag}
                   type="button"
-                  onClick={() => setSelectedTag(isSelected ? null : tag)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors cursor-pointer ${
-                    isSelected
-                      ? 'bg-primary/20 text-primary-bright border border-primary/40 font-semibold'
-                      : 'bg-surface text-muted border border-line/60 hover:text-text hover:border-line'
-                  }`}
+                  onClick={() => setSelectedTag(null)}
+                  className="text-[10px] text-neon-magenta hover:underline cursor-pointer"
                 >
-                  #{tag}
+                  Reset Tag
                 </button>
-              );
-            })}
-            {selectedTag && (
-              <button
-                type="button"
-                onClick={() => setSelectedTag(null)}
-                className="text-[10px] text-muted hover:text-text ml-1"
-              >
-                (hapus tag)
-              </button>
-            )}
+              )}
+            </div>
+            <div className="-mx-3.5 px-3.5 sm:mx-0 sm:px-0 flex items-center gap-1.5 overflow-x-auto sm:flex-wrap [scrollbar-width:none] [-webkit-overflow-scrolling:touch] py-0.5">
+              {allTags.map((tag) => {
+                const isSelected = selectedTag === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setSelectedTag(isSelected ? null : tag)}
+                    className={`flex-none px-2.5 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer whitespace-nowrap ${
+                      isSelected
+                        ? 'bg-primary/20 text-primary-bright border border-primary/40 font-semibold'
+                        : 'bg-surface text-muted border border-line/60 hover:text-text hover:border-line'
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Filter Feedback */}
+        {isFiltered && (
+          <div className="flex items-center justify-between text-xs text-muted pt-2 border-t border-line/30">
+            <span>
+              Menampilkan <strong className="text-text font-bold">{filteredNotes.length}</strong> dari {notes.length} catatan
+            </span>
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="text-xs text-neon-magenta hover:underline cursor-pointer font-medium"
+            >
+              Reset semua filter
+            </button>
           </div>
         )}
       </section>
@@ -371,7 +402,7 @@ export function NotesListView({
       ) : (
         <div
           data-testid="notes-grid"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5"
         >
           {filteredNotes.map((note) => (
             <NoteCard

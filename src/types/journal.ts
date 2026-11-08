@@ -46,6 +46,13 @@ export interface JournalMovieRelation {
   };
 }
 
+export interface RelatedJournalSummary {
+  id: string;
+  title: string;
+  entryDate: string;
+  resonanceNote?: string | null;
+}
+
 export interface PersonalNote {
   id: string;
   userId: string;

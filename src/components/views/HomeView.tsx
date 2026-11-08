@@ -206,11 +206,11 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
           TASK 5: COLLECTION OVERVIEW (Quick Stats Grid)
          ───────────────────────────────────────────────────────────── */}
       <section aria-label="Ringkasan Koleksi" className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="card p-4 sm:p-5 flex flex-col justify-between">
+        <div className="card p-3.5 sm:p-5 flex flex-col justify-between">
           <span className="font-pixel text-[10px] text-muted tracking-wider uppercase">
             TOTAL FILM
           </span>
-          <div className="mt-3 flex items-baseline gap-2">
+          <div className="mt-2.5 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="font-serif font-bold text-2xl sm:text-3xl text-text">
               {stats.total}
             </span>
@@ -218,11 +218,11 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
           </div>
         </div>
 
-        <div className="card p-4 sm:p-5 flex flex-col justify-between">
+        <div className="card p-3.5 sm:p-5 flex flex-col justify-between">
           <span className="font-pixel text-[10px] text-ok tracking-wider uppercase">
             SUDAH DITONTON
           </span>
-          <div className="mt-3 flex items-baseline gap-2">
+          <div className="mt-2.5 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="font-serif font-bold text-2xl sm:text-3xl text-ok">
               {stats.watched}
             </span>
@@ -230,11 +230,11 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
           </div>
         </div>
 
-        <div className="card p-4 sm:p-5 flex flex-col justify-between">
+        <div className="card p-3.5 sm:p-5 flex flex-col justify-between">
           <span className="font-pixel text-[10px] text-primary-bright tracking-wider uppercase">
             WATCHLIST
           </span>
-          <div className="mt-3 flex items-baseline gap-2">
+          <div className="mt-2.5 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="font-serif font-bold text-2xl sm:text-3xl text-primary-bright">
               {stats.unwatched}
             </span>
@@ -242,11 +242,11 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
           </div>
         </div>
 
-        <div className="card p-4 sm:p-5 flex flex-col justify-between">
+        <div className="card p-3.5 sm:p-5 flex flex-col justify-between">
           <span className="font-pixel text-[10px] text-neon-magenta tracking-wider uppercase">
             CATATAN RISET
           </span>
-          <div className="mt-3 flex items-baseline gap-2">
+          <div className="mt-2.5 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="font-serif font-bold text-2xl sm:text-3xl text-neon-magenta">
               {stats.withNotes}
             </span>
@@ -299,17 +299,27 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
           )}
         </div>
 
-        {/* Triple Bill Editorial Cards */}
+        {/* Triple Bill Editorial Cards: Mobile Snap Carousel + Desktop Grid */}
         {picks.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {picks.map((movie, index) => {
-              const tapeNumber = `TAPE #0${index + 1}`;
+          <div>
+            {/* Mobile swipe hint */}
+            <div className="flex items-center justify-between md:hidden text-[10px] font-pixel text-muted/70 mb-2 px-1">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-neon-magenta animate-pulse" />
+                <span>GESER KARTU // 3 REKOMENDASI</span>
+              </span>
+              <span className="text-muted/60">SNAP CAROUSEL ↔</span>
+            </div>
 
-              return (
-                <div
-                  key={movie.id}
-                  className="card group/triple p-4 flex flex-col justify-between hover:border-primary/40"
-                >
+            <div className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory [scrollbar-width:none] [-webkit-overflow-scrolling:touch] -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0">
+              {picks.map((movie, index) => {
+                const tapeNumber = `TAPE #0${index + 1}`;
+
+                return (
+                  <div
+                    key={movie.id}
+                    className="card group/triple p-4 flex flex-col justify-between hover:border-primary/40 flex-none w-[82%] sm:w-[65%] md:w-auto snap-center sm:snap-start transition-all shadow-md"
+                  >
                   {/* Sequence Header */}
                   <div className="flex items-center justify-between text-[10px] font-pixel text-muted mb-3">
                     <span className="text-primary-bright font-bold">{tapeNumber}</span>
@@ -371,6 +381,7 @@ export function HomeView({ initialMovies = [], initialMoods = [] }: HomeViewProp
               );
             })}
           </div>
+        </div>
         ) : movies.length === 0 ? (
           <EmptyState
             title="Kabin film masih kosong."

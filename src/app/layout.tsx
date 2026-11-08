@@ -78,7 +78,7 @@ export default function RootLayout({
           <ToastProvider>
             <PwaRegister />
             <Header />
-            <div id="app" className="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-[100px] md:pb-16">
+            <div id="app" className="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-8 sm:pb-12 md:pb-16">
               <main id="view" className="w-full">
                 {children}
               </main>

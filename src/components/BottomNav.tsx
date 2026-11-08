@@ -25,14 +25,14 @@ export function BottomNav() {
     <>
       <nav
         aria-label="Navigasi mobile"
-        className="md:hidden fixed left-0 right-0 bottom-0 bg-surface/95 backdrop-blur-lg border-t border-line/80 z-30 transition-colors"
+        className="md:hidden fixed left-0 right-0 bottom-0 bg-surface/95 backdrop-blur-lg border-t border-line/80 z-30 transition-colors shadow-[0_-4px_20px_rgba(0,0,0,0.15)]"
       >
         <div className="max-w-md mx-auto grid grid-cols-5 items-center px-1.5 sm:px-3 pt-1.5 pb-[calc(8px+env(safe-area-inset-bottom))]">
           {/* 1. Home */}
           <Link
             href="/"
             data-testid="bottomnav-home"
-            className={`min-h-[44px] flex flex-col items-center justify-center gap-1 text-[10px] sm:text-[11px] py-1 rounded-lg transition-colors ${
+            className={`min-h-[44px] flex flex-col items-center justify-center gap-0.5 text-[10px] sm:text-[11px] py-1 rounded-lg transition-all active:scale-95 ${
               isHome ? 'text-neon-magenta font-semibold' : 'text-muted hover:text-text'
             }`}
             aria-label="Beranda"
@@ -45,13 +45,16 @@ export function BottomNav() {
               <path d="M3 11l9-7 9 7v9H3z" />
             </svg>
             <span className="truncate">Home</span>
+            {isHome && (
+              <span className="w-1 h-1 rounded-full bg-neon-magenta -mb-1 animate-pulse shadow-[0_0_6px_var(--neon-magenta)]" aria-hidden="true" />
+            )}
           </Link>
 
           {/* 2. Bank */}
           <Link
             href="/bank"
             data-testid="bottomnav-bank"
-            className={`min-h-[44px] flex flex-col items-center justify-center gap-1 text-[10px] sm:text-[11px] py-1 rounded-lg transition-colors ${
+            className={`min-h-[44px] flex flex-col items-center justify-center gap-0.5 text-[10px] sm:text-[11px] py-1 rounded-lg transition-all active:scale-95 ${
               isBank ? 'text-neon-magenta font-semibold' : 'text-muted hover:text-text'
             }`}
             aria-label="Movie Bank"
@@ -65,6 +68,9 @@ export function BottomNav() {
               <rect x="14" y="4" width="7" height="16" rx="1" />
             </svg>
             <span className="truncate">Bank</span>
+            {isBank && (
+              <span className="w-1 h-1 rounded-full bg-neon-magenta -mb-1 animate-pulse shadow-[0_0_6px_var(--neon-magenta)]" aria-hidden="true" />
+            )}
           </Link>
 
           {/* 3. Action + (Creation Drawer Trigger) */}
@@ -103,7 +109,7 @@ export function BottomNav() {
           <Link
             href="/archive"
             data-testid="bottomnav-archive"
-            className={`min-h-[44px] flex flex-col items-center justify-center gap-1 text-[10px] sm:text-[11px] py-1 rounded-lg transition-colors ${
+            className={`min-h-[44px] flex flex-col items-center justify-center gap-0.5 text-[10px] sm:text-[11px] py-1 rounded-lg transition-all active:scale-95 ${
               isArchive ? 'text-neon-magenta font-semibold' : 'text-muted hover:text-text'
             }`}
             aria-label="Arsip Creator"
@@ -116,13 +122,16 @@ export function BottomNav() {
               <path d="M5 4h14v16l-7-4-7 4z" />
             </svg>
             <span className="truncate">Archive</span>
+            {isArchive && (
+              <span className="w-1 h-1 rounded-full bg-neon-magenta -mb-1 animate-pulse shadow-[0_0_6px_var(--neon-magenta)]" aria-hidden="true" />
+            )}
           </Link>
 
           {/* 5. Profil */}
           <Link
             href="/profile"
             data-testid="bottomnav-profile"
-            className={`min-h-[44px] flex flex-col items-center justify-center gap-1 text-[10px] sm:text-[11px] py-1 rounded-lg transition-colors ${
+            className={`min-h-[44px] flex flex-col items-center justify-center gap-0.5 text-[10px] sm:text-[11px] py-1 rounded-lg transition-all active:scale-95 ${
               isProfile ? 'text-neon-magenta font-semibold' : 'text-muted hover:text-text'
             }`}
             aria-label="Profil Pengguna"
@@ -136,6 +145,9 @@ export function BottomNav() {
               <circle cx="12" cy="7" r="4" />
             </svg>
             <span className="truncate">Profil</span>
+            {isProfile && (
+              <span className="w-1 h-1 rounded-full bg-neon-magenta -mb-1 animate-pulse shadow-[0_0_6px_var(--neon-magenta)]" aria-hidden="true" />
+            )}
           </Link>
         </div>
       </nav>

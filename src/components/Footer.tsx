@@ -22,7 +22,7 @@ export function Footer() {
         <div className="w-full h-full opacity-35 bg-[repeating-linear-gradient(90deg,var(--line)_0px,var(--line)_6px,transparent_6px,transparent_18px)]" />
       </div>
 
-      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-[calc(96px+env(safe-area-inset-bottom))] md:pb-10">
         <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 sm:gap-8">
           {/* Brand & Editorial Persona */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-3 max-w-sm">
@@ -61,20 +61,20 @@ export function Footer() {
           {/* Navigasi Cepat & Technical OSD */}
           <div className="flex flex-col items-center md:items-end text-center md:text-right space-y-3">
             {/* Quick Links */}
-            <nav aria-label="Navigasi footer" className="flex items-center gap-4 text-xs font-medium text-muted flex-wrap justify-center">
-              <Link href="/" className="hover:text-primary-bright transition-colors">
+            <nav aria-label="Navigasi footer" className="flex items-center gap-3 sm:gap-4 text-xs font-medium text-muted flex-wrap justify-center">
+              <Link href="/" className="py-1 px-1 hover:text-primary-bright transition-colors">
                 Home
               </Link>
               <span className="text-line select-none">/</span>
-              <Link href="/bank" className="hover:text-primary-bright transition-colors">
+              <Link href="/bank" className="py-1 px-1 hover:text-primary-bright transition-colors">
                 Movie Bank
               </Link>
               <span className="text-line select-none">/</span>
-              <Link href="/archive" className="hover:text-primary-bright transition-colors">
+              <Link href="/archive" className="py-1 px-1 hover:text-primary-bright transition-colors">
                 Archive
               </Link>
               <span className="text-line select-none">/</span>
-              <Link href="/add" className="hover:text-primary-bright transition-colors">
+              <Link href="/add" className="py-1 px-1 hover:text-primary-bright transition-colors">
                 Tambah Film
               </Link>
             </nav>

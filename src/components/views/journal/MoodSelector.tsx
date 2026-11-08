@@ -57,7 +57,7 @@ export function MoodSelector({
         <button
           type="button"
           onClick={() => onSelectMood(null)}
-          className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-150 cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-150 cursor-pointer flex-none whitespace-nowrap ${
             selectedMood === null
               ? 'bg-surface-elevated text-text border-primary/40 font-semibold shadow-xs'
               : 'bg-surface/60 text-muted border-line hover:text-text hover:border-line-subtle'
@@ -76,7 +76,7 @@ export function MoodSelector({
             key={mood}
             type="button"
             onClick={() => onSelectMood(isSelected && allowClear ? null : mood)}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-150 cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-150 cursor-pointer flex items-center gap-1.5 flex-none whitespace-nowrap ${
               isSelected
                 ? `${colorStyle.active} font-semibold shadow-xs scale-[1.02]`
                 : colorStyle.idle

@@ -13,13 +13,26 @@ import { FilmStripDivider } from '@/components/FilmStripDivider';
 import { TmdbAttribution } from '@/components/TmdbAttribution';
 import { useToast } from '@/components/Toast';
 
+export interface RelatedJournalSummary {
+  id: string;
+  title: string;
+  entryDate: string;
+  resonanceNote?: string | null;
+}
+
 interface MovieDetailViewProps {
   initialMovie: Movie;
   initialMoods?: string[];
   posterUrl?: string | null;
+  relatedJournals?: RelatedJournalSummary[];
 }
 
-export function MovieDetailView({ initialMovie, initialMoods = [], posterUrl }: MovieDetailViewProps) {
+export function MovieDetailView({
+  initialMovie,
+  initialMoods = [],
+  posterUrl,
+  relatedJournals = [],
+}: MovieDetailViewProps) {
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -73,8 +86,10 @@ export function MovieDetailView({ initialMovie, initialMoods = [], posterUrl }: 
 
   return (
     <div className="space-y-6 sm:space-y-8 max-w-5xl mx-auto">
-      {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb">
+      {/* ─────────────────────────────────────────────────────────────
+          BREADCRUMB & OSD DOSSIER WATERMARK
+         ───────────────────────────────────────────────────────────── */}
+      <nav aria-label="Breadcrumb" className="flex items-center justify-between">
         <Link
           href="/bank"
           className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted hover:text-primary-bright transition-colors font-medium group"
@@ -88,12 +103,122 @@ export function MovieDetailView({ initialMovie, initialMoods = [], posterUrl }: 
           </svg>
           <span>Kembali ke Movie Bank</span>
         </Link>
+        <span className="text-[10px] font-pixel uppercase tracking-widest text-muted/60 md:hidden">
+          CINEMA DOSSIER // MOCAB
+        </span>
       </nav>
 
-      {/* Main Dossier Grid */}
+      {/* ─────────────────────────────────────────────────────────────
+          MOBILE COMPACT HERO (< md only)
+          Brings Title, Poster, Metadata & Core Actions into 1st fold
+         ───────────────────────────────────────────────────────────── */}
+      <div className="md:hidden space-y-4">
+        {/* Compact Hero Lockup: Poster + Identity */}
+        <div className="flex gap-3.5 sm:gap-4 items-start">
+          {/* Compact Poster Cover with Ambient Glow */}
+          <div className="w-24 sm:w-32 flex-shrink-0 group/poster relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/25 via-neon-magenta/20 to-primary-bright/25 rounded-xl blur-md opacity-60" />
+            <PosterCover
+              title={movie.title}
+              identifier={movie.tmdbId || movie.id}
+              done={movie.done}
+              year={movie.year}
+              posterUrl={posterUrl || movie.posterUrl}
+              big
+              className="relative shadow-xl rounded-xl overflow-hidden aspect-[2/3] w-full"
+            />
+          </div>
+
+          {/* Identity & Metadata Header */}
+          <div className="flex-1 min-w-0 space-y-1.5 sm:space-y-2">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Badge variant={movie.done ? 'watched' : 'watchlist'} size="xs">
+                {movie.done ? 'SUDAH DITONTON' : 'BELUM DITONTON'}
+              </Badge>
+              {movie.tmdbId && (
+                <span className="text-[9px] font-pixel text-lavender/90 bg-surface-elevated border border-line px-1.5 py-0.5 rounded">
+                  TMDB #{movie.tmdbId}
+                </span>
+              )}
+            </div>
+
+            <h1 className="font-serif font-bold text-lg sm:text-2xl text-text tracking-tight leading-snug">
+              {movie.title}
+            </h1>
+
+            {/* Mobile Metadata Ledger */}
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono text-muted flex-wrap">
+              {movie.year && (
+                <>
+                  <span className="text-text font-medium">{movie.year}</span>
+                  <span className="text-line">/</span>
+                </>
+              )}
+              {movie.runtime && (
+                <>
+                  <span className="text-text-subtle">{movie.runtime}m</span>
+                  <span className="text-line">/</span>
+                </>
+              )}
+              <span className="text-muted/80">Digital</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Primary Actions */}
+        <div className="space-y-2 pt-2 border-t border-line/60">
+          {hasSafeWatchUrl ? (
+            <a
+              className="btn primary w-full text-center text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-primary/25 cursor-pointer py-2.5"
+              href={movie.watchUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              <span>Buka Tautan Nonton</span>
+            </a>
+          ) : (
+            <button
+              type="button"
+              className="btn w-full text-center text-xs sm:text-sm text-muted/60 bg-surface/40 cursor-not-allowed py-2.5"
+              disabled
+            >
+              Belum ada tautan nonton
+            </button>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Link
+              href={`/bank/${movie.id}/catat`}
+              className="btn secondary w-full text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-2 hover:border-primary-bright transition-all py-2.5"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none stroke-[2]" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              <span>{movie.done ? 'Edit Catatan Riset' : 'Catat Setelah Nonton'}</span>
+            </Link>
+
+            <div className="flex justify-center sm:justify-end items-center">
+              <ConfirmInline
+                isConfirming={isDeleting}
+                onInitiate={() => setIsDeleting(true)}
+                onConfirm={handleDeleteConfirm}
+                onCancel={() => setIsDeleting(false)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          MAIN DOSSIER GRID (Desktop 2-Col / Responsive Flow)
+         ───────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-8 items-start">
-        {/* Left Column: Poster Anchor & Direct Actions */}
-        <div className="space-y-5">
+        {/* Left Column: Poster Anchor & Direct Actions (Desktop only) */}
+        <div className="hidden md:block space-y-5">
           <div className="sticky top-24 space-y-5">
             {/* Poster Anchor with subtle VHS ambient glow */}
             <div className="relative group/poster">
@@ -157,9 +282,9 @@ export function MovieDetailView({ initialMovie, initialMoods = [], posterUrl }: 
         </div>
 
         {/* Right Column: Editorial Record / Dossier Content */}
-        <div className="space-y-7">
-          {/* Film Identity & Status Header */}
-          <section className="border-b border-line pb-6">
+        <div className="space-y-6 sm:space-y-7">
+          {/* Film Identity & Status Header (Desktop only) */}
+          <section className="hidden md:block border-b border-line pb-6">
             <div className="flex items-center gap-2 mb-2.5 flex-wrap">
               <Badge variant={movie.done ? 'watched' : 'watchlist'} size="sm">
                 {movie.done ? 'SUDAH DITONTON' : 'BELUM DITONTON'}
@@ -250,6 +375,44 @@ export function MovieDetailView({ initialMovie, initialMoods = [], posterUrl }: 
                 >
                   {movie.watchUrl}
                 </a>
+              </div>
+            </section>
+          )}
+
+          {/* Journal Kurator (Strict: only rendered when real related journals exist) */}
+          {relatedJournals && relatedJournals.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs font-pixel uppercase tracking-wider text-muted flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-lavender" />
+                  <span>Journal Kurator</span>
+                </h2>
+                <span className="text-[11px] text-muted/60 font-mono">
+                  {relatedJournals.length} Entri Terhubung
+                </span>
+              </div>
+              <div className="space-y-2.5">
+                {relatedJournals.map((entry) => (
+                  <Link
+                    key={entry.id}
+                    href={`/journal/${entry.id}`}
+                    className="card p-3.5 sm:p-4 hover:border-lavender/50 block transition-all group"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <h3 className="font-serif font-semibold text-sm sm:text-base text-text group-hover:text-primary-bright transition-colors">
+                        {entry.title}
+                      </h3>
+                      <span className="text-[10px] font-mono text-muted/80 whitespace-nowrap">
+                        {entry.entryDate}
+                      </span>
+                    </div>
+                    {entry.resonanceNote && (
+                      <p className="text-xs text-muted/80 line-clamp-2 italic font-serif mt-1">
+                        &ldquo;{entry.resonanceNote}&rdquo;
+                      </p>
+                    )}
+                  </Link>
+                ))}
               </div>
             </section>
           )}
