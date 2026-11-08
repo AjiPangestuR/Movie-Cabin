@@ -32,12 +32,16 @@ export function Header() {
   const isBank = pathname.startsWith('/bank') && !pathname.includes('/catat');
   const isAdd = pathname === '/add';
   const isArchive = pathname === '/archive';
+  const isJournal = pathname.startsWith('/journal');
+  const isNotes = pathname.startsWith('/notes');
 
-  // Primary navigation: Home, Movie Bank, Archive
+  // Primary navigation: Home, Movie Bank, Archive, Journal (Catatan Harian), Notes (Catatan Pribadi)
   const navLinks = [
-    { href: '/', label: 'Home', active: isHome },
-    { href: '/bank', label: 'Movie Bank', active: isBank },
-    { href: '/archive', label: 'Archive', active: isArchive },
+    { href: '/', label: 'Home', active: isHome, fullLabel: 'Beranda' },
+    { href: '/bank', label: 'Movie Bank', active: isBank, fullLabel: 'Movie Bank' },
+    { href: '/archive', label: 'Archive', active: isArchive, fullLabel: 'Arsip Creator' },
+    { href: '/journal', label: 'Journal', active: isJournal, fullLabel: 'Catatan Harian' },
+    { href: '/notes', label: 'Notes', active: isNotes, fullLabel: 'Catatan Pribadi' },
   ];
 
   return (
@@ -61,12 +65,14 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav aria-label="Navigasi desktop" className="hidden md:flex items-center gap-1.5">
+          <nav aria-label="Navigasi desktop" className="hidden md:flex items-center gap-1 lg:gap-1.5">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
+                title={link.fullLabel}
+                data-testid={`header-nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                className={`px-2.5 lg:px-3 py-1.5 rounded-lg text-xs lg:text-sm transition-all ${
                   link.active
                     ? 'bg-neon-magenta/15 text-neon-magenta font-semibold border border-neon-magenta/35 shadow-xs shadow-neon-magenta/10'
                     : 'text-muted hover:text-text hover:bg-surface/80 border border-transparent'
@@ -151,7 +157,7 @@ export function Header() {
         </div>
       </header>
 
-      {/* Global Search Modal */}
+      {/* Global Quick Search Modal */}
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
   );

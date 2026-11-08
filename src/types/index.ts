@@ -38,3 +38,5 @@ export interface CatalogMovie {
 
 export type StatusFilter = 'all' | 'no' | 'yes';
 export type SortOption = 'new' | 'title' | 'pot';
+
+export * from './journal';
