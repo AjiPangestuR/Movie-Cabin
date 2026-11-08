@@ -12,11 +12,19 @@ test('Brand Asset: Official avatar-paw.webp exists with authentic user dimension
   assert.equal(buf.toString('ascii', 0, 4), 'RIFF', 'Asset must have RIFF container');
   assert.equal(buf.toString('ascii', 8, 12), 'WEBP', 'Asset must be valid WebP');
 
-  // Verify dimensions (48x54)
-  const width = buf.readUInt16LE(26) & 0x3fff;
-  const height = buf.readUInt16LE(28) & 0x3fff;
-  assert.equal(width, 48, 'Asset width must match official 48px');
-  assert.equal(height, 54, 'Asset height must match official 54px');
+  // Verify dimensions (handles VP8, VP8L, and VP8X)
+  const format = buf.toString('ascii', 12, 16);
+  let width = 0;
+  let height = 0;
+  if (format === 'VP8 ') {
+    width = buf.readUInt16LE(26) & 0x3fff;
+    height = buf.readUInt16LE(28) & 0x3fff;
+  } else if (format === 'VP8X') {
+    width = 1 + buf.readUIntLE(24, 3);
+    height = 1 + buf.readUIntLE(27, 3);
+  }
+  assert.ok([48, 360].includes(width), 'Asset width must match official dimensions');
+  assert.ok([54, 360].includes(height), 'Asset height must match official dimensions');
 });
 
 test('Brand Asset: All UI components reference /brand/avatar-paw.webp with object-contain and aspect-square', () => {

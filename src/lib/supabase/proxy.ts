@@ -37,10 +37,19 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname === '/login';
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname === '/login';
+  const isPublicPwaResource =
+    pathname === '/offline' ||
+    pathname === '/sw.js' ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/manifest.json' ||
+    pathname === '/favicon.ico' ||
+    pathname.startsWith('/favicon-') ||
+    pathname.startsWith('/icons/');
 
-  // Redirect unauthenticated user to /login
-  if (!user && !isLoginPage) {
+  // Redirect unauthenticated user to /login (exempting public resources)
+  if (!user && !isLoginPage && !isPublicPwaResource) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

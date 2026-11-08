@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import { Movie, Mood } from '@/types';
 import { Badge } from '@/components/Badge';
@@ -14,6 +14,52 @@ interface ProfileViewProps {
   moods: Mood[];
 }
 
+// Standalone mode external store subscription
+function subscribeStandalone(callback: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  const media = window.matchMedia('(display-mode: standalone)');
+  media.addEventListener('change', callback);
+  window.addEventListener('mocab-pwa-installed', callback);
+  return () => {
+    media.removeEventListener('change', callback);
+    window.removeEventListener('mocab-pwa-installed', callback);
+  };
+}
+
+function getStandaloneSnapshot(): boolean {
+  if (typeof window === 'undefined') return false;
+  const isMediaStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  const isIosStandalone = (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+  return isMediaStandalone || isIosStandalone;
+}
+
+// Installable deferred prompt external store subscription
+function subscribeInstallable(callback: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('mocab-pwa-installable', callback);
+  window.addEventListener('mocab-pwa-installed', callback);
+  return () => {
+    window.removeEventListener('mocab-pwa-installable', callback);
+    window.removeEventListener('mocab-pwa-installed', callback);
+  };
+}
+
+function getInstallableSnapshot(): boolean {
+  if (typeof window === 'undefined') return false;
+  return Boolean(window.__MOCAB_DEFERRED_PROMPT);
+}
+
+// iOS user agent snapshot
+function getIsIosSnapshot(): boolean {
+  if (typeof window === 'undefined') return false;
+  const userAgent = window.navigator.userAgent || '';
+  return /iPhone|iPad|iPod/i.test(userAgent) && !(window as unknown as { MSStream?: boolean }).MSStream;
+}
+
+function subscribeNoop() {
+  return () => {};
+}
+
 export function ProfileView({ userEmail, movies, moods }: ProfileViewProps) {
   const totalMovies = movies.length;
   const watchedCount = movies.filter((m) => m.done).length;
@@ -21,6 +67,24 @@ export function ProfileView({ userEmail, movies, moods }: ProfileViewProps) {
   const totalMoods = moods.length;
 
   const watchedPercent = totalMovies > 0 ? Math.round((watchedCount / totalMovies) * 100) : 0;
+
+  // PWA Install Experience state using standard React 18/19 useSyncExternalStore
+  const isStandalone = useSyncExternalStore(subscribeStandalone, getStandaloneSnapshot, () => false);
+  const canInstall = useSyncExternalStore(subscribeInstallable, getInstallableSnapshot, () => false);
+  const isIos = useSyncExternalStore(subscribeNoop, getIsIosSnapshot, () => false);
+  const [showIosGuide, setShowIosGuide] = useState(false);
+
+  const handleInstallClick = async () => {
+    if (window.__MOCAB_DEFERRED_PROMPT) {
+      const promptEvent = window.__MOCAB_DEFERRED_PROMPT;
+      promptEvent.prompt();
+      await promptEvent.userChoice;
+      window.__MOCAB_DEFERRED_PROMPT = undefined;
+      window.dispatchEvent(new CustomEvent('mocab-pwa-installed'));
+    } else if (isIos) {
+      setShowIosGuide((prev) => !prev);
+    }
+  };
 
   return (
     <div className="space-y-8 sm:space-y-10 max-w-4xl mx-auto pb-8">
@@ -170,6 +234,63 @@ export function ProfileView({ userEmail, movies, moods }: ProfileViewProps) {
             <ThemeToggle />
           </div>
         </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          SECTION C.2: PWA INSTALLATION EXPERIENCE (Contextual & Non-intrusive)
+         ───────────────────────────────────────────────────────────── */}
+      <section className="card p-5 sm:p-6 bg-surface border border-line space-y-4">
+        <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary-bright" />
+              <h2 className="font-serif font-bold text-lg sm:text-xl text-text">
+                Aplikasi Web Progresif (PWA)
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-muted leading-relaxed max-w-xl">
+              Pasang Movie Cabin langsung ke layar utama ponsel atau desktop tanpa perlu mengunduh file APK.
+            </p>
+          </div>
+
+          <div className="self-start sm:self-auto flex items-center gap-2">
+            {isStandalone ? (
+              <span className="badge badge-watched px-3 py-1.5 rounded-lg text-xs font-pixel uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-ok" />
+                <span>TERPASANG SEBAGAI APP</span>
+              </span>
+            ) : canInstall || isIos ? (
+              <button
+                type="button"
+                onClick={handleInstallClick}
+                className="btn primary text-xs py-2 px-4 rounded-lg font-pixel tracking-wide flex items-center gap-2 cursor-pointer shadow-sm"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                </svg>
+                <span>Pasang ke Layar Utama</span>
+              </button>
+            ) : (
+              <span className="text-xs text-muted font-pixel uppercase px-2.5 py-1 rounded bg-surface-elevated border border-line">
+                PWA SIAP DIPASANG
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* iOS Safari Guided Steps */}
+        {showIosGuide && !isStandalone && (
+          <div className="p-4 rounded-xl bg-surface-elevated border border-line/80 space-y-2 text-xs text-text-subtle animate-in fade-in duration-200">
+            <div className="font-pixel text-[11px] text-lavender uppercase flex items-center gap-1.5">
+              <span>Panduan Pasang iOS Safari:</span>
+            </div>
+            <ol className="list-decimal list-inside space-y-1 text-muted text-xs leading-relaxed">
+              <li>Ketuk ikon <strong>Bagikan (Share)</strong> di bilah bawah browser Safari.</li>
+              <li>Gulir menu ke bawah dan pilih opsi <strong>Tambah ke Layar Utama (Add to Home Screen)</strong>.</li>
+              <li>Ketuk <strong>Tambah</strong> di pojok kanan atas untuk menyelesaikan pemasangan.</li>
+            </ol>
+          </div>
+        )}
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
