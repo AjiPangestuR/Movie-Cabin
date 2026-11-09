@@ -74,6 +74,14 @@ export function Footer() {
                 Archive
               </Link>
               <span className="text-line select-none">/</span>
+              <Link href="/journal" className="py-1 px-1 hover:text-primary-bright transition-colors">
+                Journal
+              </Link>
+              <span className="text-line select-none">/</span>
+              <Link href="/notes" className="py-1 px-1 hover:text-primary-bright transition-colors">
+                Notes
+              </Link>
+              <span className="text-line select-none">/</span>
               <Link href="/add" className="py-1 px-1 hover:text-primary-bright transition-colors">
                 Tambah Film
               </Link>

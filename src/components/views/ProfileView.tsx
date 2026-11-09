@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useSyncExternalStore } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { Movie, Mood } from '@/types';
 import { Badge } from '@/components/Badge';
@@ -207,6 +208,123 @@ export function ProfileView({ userEmail, movies, moods }: ProfileViewProps) {
               Kategori mood untuk kurasi riset esai film
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          SECTION B.2: RUANG TULIS & REFLEKSI SINEMA (Journal & Notes Shortcuts)
+         ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between border-b border-line/60 pb-2">
+          <h2 className="font-serif font-bold text-lg sm:text-xl text-text flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-lavender" />
+            <span>Ruang Tulis & Refleksi Sinema</span>
+          </h2>
+          <span className="text-xs font-mono text-muted hidden sm:inline">
+            Akses Kurasi Pribadi
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {/* Shortcut 1: My Journal */}
+          <Link
+            href="/journal"
+            data-testid="profile-shortcut-journal"
+            className="card p-4 sm:p-5 bg-surface border border-line hover:border-neon-magenta/50 hover:bg-surface-elevated transition-all duration-150 flex flex-col justify-between group min-h-[52px] active:scale-[0.98] cursor-pointer"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-neon-magenta/15 text-neon-magenta border border-neon-magenta/30 flex items-center justify-center flex-none group-hover:scale-105 transition-transform shadow-xs">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-current fill-none stroke-[2]" aria-hidden="true">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  <line x1="8" y1="7" x2="16" y2="7" />
+                  <line x1="8" y1="11" x2="14" y2="11" />
+                </svg>
+              </div>
+              <span className="text-[9px] font-pixel px-2 py-0.5 rounded bg-neon-magenta/10 text-neon-magenta uppercase tracking-wider">
+                STREAM
+              </span>
+            </div>
+            <div>
+              <div className="flex items-center justify-between gap-1">
+                <h3 className="font-serif font-bold text-sm sm:text-base text-text group-hover:text-neon-magenta transition-colors">
+                  My Journal
+                </h3>
+                <svg viewBox="0 0 16 16" className="w-4 h-4 fill-muted group-hover:text-neon-magenta group-hover:translate-x-0.5 transition-all flex-none" aria-hidden="true">
+                  <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z" />
+                </svg>
+              </div>
+              <p className="text-xs text-muted/80 mt-1 line-clamp-2 leading-relaxed">
+                Aliran renungan batin harian dan resonansi personal sinema.
+              </p>
+            </div>
+          </Link>
+
+          {/* Shortcut 2: Chronicle Vault */}
+          <Link
+            href="/journal/archive"
+            data-testid="profile-shortcut-vault"
+            className="card p-4 sm:p-5 bg-surface border border-line hover:border-lavender/50 hover:bg-surface-elevated transition-all duration-150 flex flex-col justify-between group min-h-[52px] active:scale-[0.98] cursor-pointer"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-lavender/15 text-lavender border border-lavender/30 flex items-center justify-center flex-none group-hover:scale-105 transition-transform shadow-xs">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-current fill-none stroke-[2]" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                  <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+                </svg>
+              </div>
+              <span className="text-[9px] font-pixel px-2 py-0.5 rounded bg-lavender/10 text-lavender uppercase tracking-wider">
+                VAULT
+              </span>
+            </div>
+            <div>
+              <div className="flex items-center justify-between gap-1">
+                <h3 className="font-serif font-bold text-sm sm:text-base text-text group-hover:text-lavender transition-colors">
+                  Chronicle Vault
+                </h3>
+                <svg viewBox="0 0 16 16" className="w-4 h-4 fill-muted group-hover:text-lavender group-hover:translate-x-0.5 transition-all flex-none" aria-hidden="true">
+                  <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z" />
+                </svg>
+              </div>
+              <p className="text-xs text-muted/80 mt-1 line-clamp-2 leading-relaxed">
+                Eksplorasi arsip kronologis & indeks linimasa rekaman jurnal.
+              </p>
+            </div>
+          </Link>
+
+          {/* Shortcut 3: Personal Notes */}
+          <Link
+            href="/notes"
+            data-testid="profile-shortcut-notes"
+            className="card p-4 sm:p-5 bg-surface border border-line hover:border-amber/50 hover:bg-surface-elevated transition-all duration-150 flex flex-col justify-between group min-h-[52px] active:scale-[0.98] cursor-pointer"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-amber/15 text-amber border border-amber/30 flex items-center justify-center flex-none group-hover:scale-105 transition-transform shadow-xs">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-current fill-none stroke-[2]" aria-hidden="true">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+              </div>
+              <span className="text-[9px] font-pixel px-2 py-0.5 rounded bg-amber/10 text-amber uppercase tracking-wider">
+                MEMO
+              </span>
+            </div>
+            <div>
+              <div className="flex items-center justify-between gap-1">
+                <h3 className="font-serif font-bold text-sm sm:text-base text-text group-hover:text-amber transition-colors">
+                  Personal Notes
+                </h3>
+                <svg viewBox="0 0 16 16" className="w-4 h-4 fill-muted group-hover:text-amber group-hover:translate-x-0.5 transition-all flex-none" aria-hidden="true">
+                  <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z" />
+                </svg>
+              </div>
+              <p className="text-xs text-muted/80 mt-1 line-clamp-2 leading-relaxed">
+                Papan memo scratchpad untuk kutipan dialog dan inspirasi spontan.
+              </p>
+            </div>
+          </Link>
         </div>
       </section>
 

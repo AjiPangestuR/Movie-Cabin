@@ -176,7 +176,7 @@ export function CreationDrawer({ isOpen, onClose }: CreationDrawerProps) {
                 <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-current fill-none stroke-[2]" aria-hidden="true">
                   <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
                   <line x1="7" y1="2" x2="7" y2="22" />
-                  <line x1="17" y1="2" x2="17" y2="22" />
+                  <line x1="17" y1="17" x2="17" y2="22" />
                   <line x1="2" y1="12" x2="22" y2="12" />
                   <line x1="2" y1="7" x2="7" y2="7" />
                   <line x1="2" y1="17" x2="7" y2="17" />
@@ -239,7 +239,7 @@ export function CreationDrawer({ isOpen, onClose }: CreationDrawerProps) {
             </div>
 
             <svg viewBox="0 0 16 16" className="w-4 h-4 fill-muted group-hover:text-neon-magenta group-hover:translate-x-0.5 transition-all flex-none" aria-hidden="true">
-              <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z" />
+              <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z" />
             </svg>
           </Link>
 
@@ -274,8 +274,26 @@ export function CreationDrawer({ isOpen, onClose }: CreationDrawerProps) {
             </div>
 
             <svg viewBox="0 0 16 16" className="w-4 h-4 fill-muted group-hover:text-amber group-hover:translate-x-0.5 transition-all flex-none" aria-hidden="true">
-              <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1 0-1.06z" />
+              <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z" />
             </svg>
+          </Link>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────
+            SECONDARY LINK: BROWSE EXISTING JOURNALS
+           ───────────────────────────────────────────────────────────── */}
+        <div className="pt-3.5 mt-3 border-t border-line/60 flex items-center justify-between gap-3 text-xs flex-wrap">
+          <span className="text-muted text-[11px] sm:text-xs">
+            Ingin membaca tulisan sebelumnya?
+          </span>
+          <Link
+            href="/journal"
+            onClick={onClose}
+            data-testid="drawer-link-journal"
+            className="min-h-[44px] inline-flex items-center gap-1.5 font-medium text-primary-bright hover:text-neon-magenta transition-colors active:scale-95 focus-visible:outline-2 focus-visible:outline-primary py-2 px-1"
+          >
+            <span>Buka Jurnal Saya</span>
+            <span aria-hidden="true">→</span>
           </Link>
         </div>
       </div>
