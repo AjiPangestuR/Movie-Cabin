@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Movie } from '@/types';
+import { Movie, type WatchSource, getAccessTypeLabel } from '@/types';
 import { updateMovieMoods, deleteMovie } from '@/lib/movies';
+import { deleteWatchSource, setPrimaryWatchSource } from '@/lib/watchSources';
 import { PosterCover } from '@/components/PosterCover';
 import { MoodChips } from '@/components/MoodChips';
 import { Badge } from '@/components/Badge';
@@ -12,6 +13,8 @@ import { ConfirmInline } from '@/components/ConfirmInline';
 import { FilmStripDivider } from '@/components/FilmStripDivider';
 import { TmdbAttribution } from '@/components/TmdbAttribution';
 import { useToast } from '@/components/Toast';
+import { WatchSourceModal } from '@/components/WatchSourceModal';
+import { DeleteWatchSourceDialog } from '@/components/DeleteWatchSourceDialog';
 
 export interface RelatedJournalSummary {
   id: string;
@@ -25,6 +28,7 @@ interface MovieDetailViewProps {
   initialMoods?: string[];
   posterUrl?: string | null;
   relatedJournals?: RelatedJournalSummary[];
+  initialWatchSources?: WatchSource[];
 }
 
 export function MovieDetailView({
@@ -32,6 +36,7 @@ export function MovieDetailView({
   initialMoods = [],
   posterUrl,
   relatedJournals = [],
+  initialWatchSources = [],
 }: MovieDetailViewProps) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -39,6 +44,17 @@ export function MovieDetailView({
   const [movie, setMovie] = useState<Movie>(initialMovie);
   const [availableMoods] = useState<string[]>(initialMoods);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Watch Sources State (Phase 16.2 Integration)
+  const [watchSources, setWatchSources] = useState<WatchSource[]>(initialWatchSources);
+  const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
+  const [editingSource, setEditingSource] = useState<WatchSource | null>(null);
+  const [sourceToDelete, setSourceToDelete] = useState<WatchSource | null>(null);
+  const [isDeletingSource, setIsDeletingSource] = useState(false);
+  const [isSettingPrimaryId, setIsSettingPrimaryId] = useState<string | null>(null);
+
+  const primarySource = watchSources.find((s) => s.isPrimary);
+  const hasSafeWatchUrl = /^https?:\/\/\S+$/i.test(movie.watchUrl || '');
 
   const handleToggleMood = async (mood: string) => {
     const isExisting = movie.moods.includes(mood);
@@ -73,7 +89,176 @@ export function MovieDetailView({
     }
   };
 
-  const hasSafeWatchUrl = /^https?:\/\/\S+$/i.test(movie.watchUrl || '');
+  const handleSetPrimary = async (source: WatchSource) => {
+    setIsSettingPrimaryId(source.id);
+    try {
+      const updated = await setPrimaryWatchSource(source.id);
+      setWatchSources((prev) =>
+        prev.map((s) => ({
+          ...s,
+          isPrimary: s.id === source.id,
+        }))
+      );
+      // Sinkronisasi state movie.watchUrl dengan URL primary baru
+      setMovie((prev) => ({
+        ...prev,
+        watchUrl: updated.sourceUrl || '',
+      }));
+      showToast(`"${source.platformName}" dijadikan sumber utama.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Gagal menetapkan sumber utama.';
+      showToast(msg, true);
+    } finally {
+      setIsSettingPrimaryId(null);
+    }
+  };
+
+  const handleDeleteSourceConfirm = async () => {
+    if (!sourceToDelete) return;
+    const wasPrimaryDeleted = sourceToDelete.isPrimary;
+    setIsDeletingSource(true);
+    try {
+      const result = await deleteWatchSource(sourceToDelete.id);
+      setWatchSources((prev) => {
+        const filtered = prev.filter((s) => s.id !== sourceToDelete.id);
+        if (result.newPrimaryId) {
+          return filtered.map((s) =>
+            s.id === result.newPrimaryId ? { ...s, isPrimary: true } : s
+          );
+        }
+        return filtered;
+      });
+
+      // Sinkronisasi state movie.watchUrl di client berdasarkan hasil Server Action
+      if (wasPrimaryDeleted) {
+        setMovie((prev) => ({
+          ...prev,
+          watchUrl: result.newPrimaryUrl || '',
+        }));
+      }
+
+      showToast('Sumber tontonan berhasil dihapus.');
+      setSourceToDelete(null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Gagal menghapus sumber tontonan.';
+      showToast(msg, true);
+    } finally {
+      setIsDeletingSource(false);
+    }
+  };
+
+  const handleModalSuccess = (savedSource: WatchSource, isEdit: boolean) => {
+    setWatchSources((prev) => {
+      let updatedList: WatchSource[];
+      if (isEdit) {
+        updatedList = prev.map((s) => (s.id === savedSource.id ? savedSource : s));
+      } else {
+        // If it was the first source or marked isPrimary, promote it
+        updatedList = [savedSource, ...prev];
+      }
+      if (savedSource.isPrimary) {
+        updatedList = updatedList.map((s) => ({
+          ...s,
+          isPrimary: s.id === savedSource.id,
+        }));
+      }
+      return updatedList;
+    });
+
+    // Sinkronisasi state movie.watchUrl jika sumber yang disimpan adalah primary
+    if (savedSource.isPrimary) {
+      setMovie((prev) => ({
+        ...prev,
+        watchUrl: savedSource.sourceUrl || '',
+      }));
+    }
+
+    showToast(
+      isEdit
+        ? `Sumber "${savedSource.platformName}" berhasil diperbarui.`
+        : `Sumber "${savedSource.platformName}" berhasil ditambahkan.`
+    );
+  };
+
+  /**
+   * Helper render untuk Primary CTA tombol tonton film (Mobile & Desktop).
+   * Menyesuaikan secara dinamis dengan primary source aktif, ketiadaan URL, atau legacy fallback.
+   */
+  const renderPrimaryWatchCta = (isMobile = false) => {
+    // 1. Primary Source dengan URL valid
+    if (primarySource && primarySource.sourceUrl) {
+      return (
+        <a
+          className={`btn primary w-full text-center text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-primary/25 cursor-pointer min-h-[44px] ${
+            isMobile ? 'py-2.5' : ''
+          }`}
+          href={primarySource.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current flex-none" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          <span className="truncate">Tonton di {primarySource.platformName}</span>
+        </a>
+      );
+    }
+
+    // 2. Primary Source tanpa URL (misal kaset fisik atau bioskop)
+    if (primarySource && !primarySource.sourceUrl) {
+      return (
+        <div
+          className={`w-full text-center text-xs sm:text-sm font-medium p-2.5 rounded-xl bg-surface-elevated border border-primary/40 text-text flex items-center justify-center gap-2 min-h-[44px] shadow-sm ${
+            isMobile ? 'py-2.5' : ''
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full bg-primary-bright flex-none animate-pulse" />
+          <span className="truncate">
+            Tersedia: {primarySource.platformName} ({getAccessTypeLabel(primarySource.accessType)})
+          </span>
+        </div>
+      );
+    }
+
+    // 3. Fallback ke legacy movie.watchUrl jika ada
+    if (hasSafeWatchUrl) {
+      return (
+        <a
+          className={`btn primary w-full text-center text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-primary/25 cursor-pointer min-h-[44px] ${
+            isMobile ? 'py-2.5' : ''
+          }`}
+          href={movie.watchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current flex-none" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          <span className="truncate">Buka Tautan Nonton (Arsip)</span>
+        </a>
+      );
+    }
+
+    // 4. Belum ada primary source & belum ada legacy URL: Tombol Tambah Sumber
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setEditingSource(null);
+          setIsAddEditModalOpen(true);
+        }}
+        className={`btn primary w-full text-center text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-primary/25 cursor-pointer min-h-[44px] ${
+          isMobile ? 'py-2.5' : ''
+        }`}
+      >
+        <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none stroke-[2] flex-none" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        <span>+ Tambah Sumber Tontonan</span>
+      </button>
+    );
+  };
 
   const notesList = movie.log
     ? [
@@ -92,7 +277,7 @@ export function MovieDetailView({
       <nav aria-label="Breadcrumb" className="flex items-center justify-between">
         <Link
           href="/bank"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted hover:text-primary-bright transition-colors font-medium group"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted hover:text-primary-bright transition-colors font-medium group min-h-[44px] py-2"
         >
           <svg
             viewBox="0 0 16 16"
@@ -142,11 +327,11 @@ export function MovieDetailView({
               )}
             </div>
 
-            <h1 className="font-serif font-bold text-lg sm:text-2xl text-text tracking-tight leading-snug">
+            <h1 className="font-serif font-bold text-lg sm:text-xl text-text tracking-tight leading-snug line-clamp-2">
               {movie.title}
             </h1>
 
-            {/* Mobile Metadata Ledger */}
+            {/* Quick Metadata */}
             <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono text-muted flex-wrap">
               {movie.year && (
                 <>
@@ -167,32 +352,12 @@ export function MovieDetailView({
 
         {/* Mobile Primary Actions */}
         <div className="space-y-2 pt-2 border-t border-line/60">
-          {hasSafeWatchUrl ? (
-            <a
-              className="btn primary w-full text-center text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-primary/25 cursor-pointer py-2.5"
-              href={movie.watchUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              <span>Buka Tautan Nonton</span>
-            </a>
-          ) : (
-            <button
-              type="button"
-              className="btn w-full text-center text-xs sm:text-sm text-muted/60 bg-surface/40 cursor-not-allowed py-2.5"
-              disabled
-            >
-              Belum ada tautan nonton
-            </button>
-          )}
+          {renderPrimaryWatchCta(true)}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Link
               href={`/bank/${movie.id}/catat`}
-              className="btn secondary w-full text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-2 hover:border-primary-bright transition-all py-2.5"
+              className="btn secondary w-full text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-2 hover:border-primary-bright transition-all py-2.5 min-h-[44px]"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none stroke-[2]" aria-hidden="true">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -236,31 +401,11 @@ export function MovieDetailView({
 
             {/* Quick Actions Panel */}
             <div className="space-y-2.5 pt-4 border-t border-line">
-              {hasSafeWatchUrl ? (
-                <a
-                  className="btn primary w-full text-center text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-primary/25 cursor-pointer"
-                  href={movie.watchUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                  <span>Buka Tautan Nonton</span>
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  className="btn w-full text-center text-xs sm:text-sm text-muted/60 bg-surface/40 cursor-not-allowed"
-                  disabled
-                >
-                  Belum ada tautan nonton
-                </button>
-              )}
+              {renderPrimaryWatchCta(false)}
 
               <Link
                 href={`/bank/${movie.id}/catat`}
-                className="btn secondary w-full text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-2 hover:border-primary-bright transition-all"
+                className="btn secondary w-full text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-2 hover:border-primary-bright transition-all min-h-[44px]"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none stroke-[2]" aria-hidden="true">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -355,29 +500,215 @@ export function MovieDetailView({
             </div>
           </section>
 
-          {/* Watch & Source URL Reference */}
-          {hasSafeWatchUrl && (
-            <section className="space-y-2">
-              <h2 className="text-xs font-pixel uppercase tracking-wider text-muted flex items-center gap-1.5">
+          {/* ─────────────────────────────────────────────────────────────
+              WATCH SOURCES SECTION (Phase 16.2 Integration)
+             ───────────────────────────────────────────────────────────── */}
+          <section className="space-y-3" aria-labelledby="watch-sources-heading">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-lavender" />
-                <span>Tautan Akses</span>
-              </h2>
-              <div className="flex items-center gap-2 text-xs text-muted truncate bg-surface/50 px-3.5 py-2.5 rounded-xl border border-line">
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 stroke-current fill-none stroke-[2] flex-none text-primary-bright" aria-hidden="true">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-                <a
-                  href={movie.watchUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link truncate text-primary-bright hover:underline"
-                >
-                  {movie.watchUrl}
-                </a>
+                <h2 id="watch-sources-heading" className="text-xs font-pixel uppercase tracking-wider text-muted">
+                  Sumber & Tautan Tontonan
+                </h2>
+                {watchSources.length > 0 && (
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-surface border border-line text-muted">
+                    {watchSources.length}
+                  </span>
+                )}
               </div>
-            </section>
-          )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingSource(null);
+                  setIsAddEditModalOpen(true);
+                }}
+                className="text-xs font-mono font-medium text-primary-bright hover:text-primary-bright/80 flex items-center gap-1.5 cursor-pointer min-h-[36px] px-2.5 py-1 rounded-lg hover:bg-surface transition-colors"
+              >
+                <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
+                  <path d="M8 2a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v4.5a.75.75 0 01-1.5 0v-4.5h-4.5a.75.75 0 010-1.5h4.5v-4.5A.75.75 0 018 2z" />
+                </svg>
+                <span>Tambah Sumber</span>
+              </button>
+            </div>
+
+            {watchSources.length === 0 ? (
+              <div className="p-4 sm:p-5 rounded-xl bg-surface/50 border border-line text-xs sm:text-sm text-muted space-y-2">
+                {hasSafeWatchUrl ? (
+                  <div className="space-y-2">
+                    <p className="text-text/90 font-medium">Tautan Tontonan Warisan (Arsip):</p>
+                    <div className="flex items-center gap-2 text-xs truncate bg-surface px-3 py-2 rounded-lg border border-line font-mono">
+                      <a
+                        href={movie.watchUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-bright truncate hover:underline"
+                      >
+                        {movie.watchUrl}
+                      </a>
+                    </div>
+                    <p className="text-[11px] text-muted/70">
+                      Tautan ini tersimpan dari arsip lama. Anda dapat menambahkan sumber terstruktur (Netflix, Criterion, VHS fisik, dll.) melalui tombol &quot;Tambah Sumber&quot;.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 space-y-2">
+                    <p className="text-text/80 font-medium">Belum ada sumber tontonan tercatat.</p>
+                    <p className="text-[11px] text-muted/70 max-w-sm mx-auto">
+                      Catat ketersediaan film ini di platform streaming, persewaan, bioskop, atau koleksi media fisik Anda.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingSource(null);
+                        setIsAddEditModalOpen(true);
+                      }}
+                      className="btn secondary text-xs px-4 py-2 mt-1 min-h-[44px] cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      <span>+ Tambah Sumber Sekarang</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {watchSources.map((source) => (
+                  <div
+                    key={source.id}
+                    className={`card p-3.5 sm:p-4 rounded-xl border transition-all ${
+                      source.isPrimary
+                        ? 'border-primary/50 bg-surface-elevated/70 shadow-sm shadow-primary/10'
+                        : 'border-line bg-surface/50 hover:border-line-hover'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
+                      {/* Left: Source Details */}
+                      <div className="space-y-1.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-serif font-bold text-sm sm:text-base text-text">
+                            {source.platformName}
+                          </span>
+
+                          {/* Access Type Badge */}
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-line bg-surface text-muted">
+                            {getAccessTypeLabel(source.accessType)}
+                          </span>
+
+                          {/* Primary Badge */}
+                          {source.isPrimary && (
+                            <span className="text-[10px] font-pixel px-2 py-0.5 rounded bg-primary/20 text-primary-bright border border-primary/40 flex items-center gap-1">
+                              <span>★</span>
+                              <span>UTAMA</span>
+                            </span>
+                          )}
+                        </div>
+
+                        {/* URL / Physical info */}
+                        {source.sourceUrl ? (
+                          <div className="flex items-center gap-1.5 text-xs text-muted truncate">
+                            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-current text-primary-bright flex-none" aria-hidden="true">
+                              <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z" />
+                              <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z" />
+                            </svg>
+                            <a
+                              href={source.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-bright hover:underline truncate font-mono text-[11px]"
+                            >
+                              {source.sourceUrl}
+                            </a>
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-muted/70 italic font-mono">
+                            Koleksi fisik / Tanpa tautan digital
+                          </p>
+                        )}
+
+                        {/* Notes */}
+                        {source.notes && (
+                          <p className="text-xs text-text/80 bg-surface/40 px-2.5 py-1.5 rounded-lg border border-line/60 text-[11px] leading-relaxed">
+                            {source.notes}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Right: Actions */}
+                      <div className="flex items-center gap-1.5 flex-none sm:self-center pt-2 sm:pt-0 border-t sm:border-t-0 border-line/40 w-full sm:w-auto justify-end">
+                        {/* Open URL button */}
+                        {source.sourceUrl && (
+                          <a
+                            href={source.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl text-xs font-medium text-primary-bright hover:bg-surface border border-line/60 hover:border-primary/40 flex items-center gap-1 transition-all"
+                            title="Buka Tautan"
+                            aria-label={`Buka tautan ${source.platformName}`}
+                          >
+                            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
+                              <polygon points="4 2 13 8 4 14 4 2" />
+                            </svg>
+                            <span className="hidden sm:inline">Buka</span>
+                          </a>
+                        )}
+
+                        {/* Set Primary Button */}
+                        {!source.isPrimary && (
+                          <button
+                            type="button"
+                            onClick={() => handleSetPrimary(source)}
+                            disabled={isSettingPrimaryId === source.id}
+                            className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-text hover:bg-surface border border-line/60 hover:border-primary/40 flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
+                            title="Jadikan Sumber Utama"
+                          >
+                            {isSettingPrimaryId === source.id ? (
+                              <span className="w-3.5 h-3.5 border border-white/20 border-t-white rounded-full animate-spin" />
+                            ) : (
+                              <span>★</span>
+                            )}
+                            <span className="hidden sm:inline">Utama</span>
+                          </button>
+                        )}
+
+                        {/* Edit Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingSource(source);
+                            setIsAddEditModalOpen(true);
+                          }}
+                          className="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-text hover:bg-surface border border-line/60 hover:border-line flex items-center justify-center transition-all cursor-pointer"
+                          title="Ubah Sumber"
+                          aria-label={`Ubah sumber ${source.platformName}`}
+                        >
+                          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 stroke-current fill-none stroke-[2]" aria-hidden="true">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                          <span className="hidden sm:inline ml-1">Ubah</span>
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
+                          type="button"
+                          onClick={() => setSourceToDelete(source)}
+                          className="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl text-xs font-medium text-neon-coral/80 hover:text-neon-coral hover:bg-neon-coral/10 border border-line/60 hover:border-neon-coral/30 flex items-center justify-center transition-all cursor-pointer"
+                          title="Hapus Sumber"
+                          aria-label={`Hapus sumber ${source.platformName}`}
+                        >
+                          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 stroke-current fill-none stroke-[2]" aria-hidden="true">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                          <span className="hidden sm:inline ml-1">Hapus</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
 
           {/* Journal Kurator (Strict: only rendered when real related journals exist) */}
           {relatedJournals && relatedJournals.length > 0 && (
@@ -398,16 +729,19 @@ export function MovieDetailView({
                     href={`/journal/${entry.id}`}
                     className="card p-3.5 sm:p-4 hover:border-lavender/50 block transition-all group"
                   >
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <h3 className="font-serif font-semibold text-sm sm:text-base text-text group-hover:text-primary-bright transition-colors">
-                        {entry.title}
-                      </h3>
-                      <span className="text-[10px] font-mono text-muted/80 whitespace-nowrap">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-xs font-mono text-muted">
                         {entry.entryDate}
                       </span>
+                      <span className="text-[10px] font-pixel text-lavender/80 group-hover:text-lavender transition-colors">
+                        BACA ENTRI →
+                      </span>
                     </div>
+                    <h3 className="font-serif font-bold text-sm sm:text-base text-text group-hover:text-lavender transition-colors">
+                      {entry.title}
+                    </h3>
                     {entry.resonanceNote && (
-                      <p className="text-xs text-muted/80 line-clamp-2 italic font-serif mt-1">
+                      <p className="text-xs text-muted/80 mt-1 line-clamp-2 italic font-serif">
                         &ldquo;{entry.resonanceNote}&rdquo;
                       </p>
                     )}
@@ -417,7 +751,7 @@ export function MovieDetailView({
             </section>
           )}
 
-          {/* Film Strip Divider */}
+          {/* FilmStrip Ornament divider */}
           <FilmStripDivider label="CINEMA DOSSIER // NOTES" />
 
           {/* Creator Archive / The Writer's Room Research Notes */}
@@ -500,15 +834,36 @@ export function MovieDetailView({
               </Link>
             </section>
           )}
+
+          {/* TMDB Official Attribution bila film terhubung dengan TMDB */}
+          {Boolean(movie.tmdbId) && (
+            <section className="pt-6 border-t border-line">
+              <TmdbAttribution />
+            </section>
+          )}
         </div>
       </div>
 
-      {/* TMDB Official Attribution bila film terhubung dengan TMDB */}
-      {Boolean(movie.tmdbId) && (
-        <section className="pt-6 border-t border-line">
-          <TmdbAttribution />
-        </section>
-      )}
+      {/* Watch Source Add / Edit Modal */}
+      <WatchSourceModal
+        isOpen={isAddEditModalOpen}
+        onClose={() => {
+          setIsAddEditModalOpen(false);
+          setEditingSource(null);
+        }}
+        movieId={movie.id}
+        initialData={editingSource}
+        onSuccess={handleModalSuccess}
+      />
+
+      {/* Watch Source Delete Confirmation Dialog */}
+      <DeleteWatchSourceDialog
+        isOpen={Boolean(sourceToDelete)}
+        source={sourceToDelete}
+        isDeleting={isDeletingSource}
+        onConfirm={handleDeleteSourceConfirm}
+        onCancel={() => setSourceToDelete(null)}
+      />
     </div>
   );
 }

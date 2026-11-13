@@ -20,6 +20,8 @@ export interface Movie {
   log?: WatchLog;
   posterUrl?: string | null;
   posterPath?: string | null;
+  watchSources?: import('./watchSource').WatchSource[];
+  watchSourceSync?: import('./watchSource').WatchSourceSyncStatus;
 }
 
 export interface Mood {
@@ -40,3 +42,4 @@ export type StatusFilter = 'all' | 'no' | 'yes';
 export type SortOption = 'new' | 'title' | 'pot';
 
 export * from './journal';
+export * from './watchSource';

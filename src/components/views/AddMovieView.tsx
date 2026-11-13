@@ -306,7 +306,19 @@ export function AddMovieView({ initialMoods = [], initialMoodObjects = [] }: Add
         posterPath: selectedMovie.posterPath || null,
       });
 
-      showToast(`"${newMovie.title}" masuk ke Kabin.`);
+      if (newMovie.watchSourceSync === 'failed') {
+        showToast(
+          `"${newMovie.title}" masuk ke Kabin, namun tautan tontonan gagal disinkronkan.`,
+          true
+        );
+      } else if (newMovie.watchSourceSync === 'invalid_url') {
+        showToast(
+          `"${newMovie.title}" tersimpan tanpa tautan (format tautan tidak valid).`,
+          true
+        );
+      } else {
+        showToast(`"${newMovie.title}" masuk ke Kabin.`);
+      }
       router.push(`/bank/${newMovie.id}`);
       router.refresh();
     } catch (err: unknown) {

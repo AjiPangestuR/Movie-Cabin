@@ -4,6 +4,7 @@ import { MovieDetailView } from '@/components/views/MovieDetailView';
 import { getMovie, isValidUuid } from '@/lib/movies';
 import { listMoods } from '@/lib/moods';
 import { getRelatedJournalsForMovie } from '@/lib/journal';
+import { listWatchSources } from '@/lib/watchSources';
 import { getTmdbMovieDetail, isTmdbConfigured } from '@/lib/tmdb';
 
 interface MovieDetailPageProps {
@@ -29,10 +30,14 @@ export default async function MovieDetailPage({ params }: MovieDetailPageProps) 
     notFound();
   }
 
-  const [movie, moods, relatedJournals] = await Promise.all([
+  const [movie, moods, relatedJournals, initialWatchSources] = await Promise.all([
     getMovie(id),
     listMoods(),
     getRelatedJournalsForMovie(id),
+    listWatchSources(id).catch((err) => {
+      console.warn('Gagal memuat sumber tontonan (fallback ke array kosong):', err);
+      return [];
+    }),
   ]);
   if (!movie) {
     notFound();
@@ -57,6 +62,7 @@ export default async function MovieDetailPage({ params }: MovieDetailPageProps) 
       initialMoods={moods.map((m) => m.name)}
       posterUrl={posterUrl}
       relatedJournals={relatedJournals}
+      initialWatchSources={initialWatchSources}
     />
   );
 }

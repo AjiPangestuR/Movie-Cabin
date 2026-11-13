@@ -13,6 +13,8 @@ import {
   mapMovieRpcError,
   mapWatchLogRpcError,
 } from '@/lib/validations';
+import { createWatchSource } from '@/lib/watchSources';
+import { detectPlatformFromUrl, isValidSourceUrl } from '@/lib/watch-source-validations';
 
 export { isValidUuid };
 
@@ -159,7 +161,36 @@ export interface AddMovieInput {
  * Menambahkan film baru secara atomik via RPC save_movie_with_moods
  */
 export async function addMovie(input: AddMovieInput): Promise<Movie> {
-  const { cleanTitle, cleanUrl, yearNum, runtimeNum } = validateMovieInput(input);
+  let cleanTitle: string;
+  let cleanUrl: string | null = null;
+  let yearNum: number | null = null;
+  let runtimeNum: number | null = null;
+  let isUrlInvalid = false;
+
+  try {
+    const validated = validateMovieInput(input);
+    cleanTitle = validated.cleanTitle;
+    cleanUrl = validated.cleanUrl;
+    yearNum = validated.yearNum;
+    runtimeNum = validated.runtimeNum;
+  } catch (valErr: unknown) {
+    // Skenario D: URL invalid
+    // Jika kegagalan hanya terjadi pada format URL (misal tidak diawali http:// atau https://),
+    // film tetap disimpan tanpa watch_url, dan status invalid_url dicatat untuk user feedback.
+    if (
+      valErr instanceof Error &&
+      valErr.message.includes('Tautan harus diawali http:// atau https://')
+    ) {
+      const validatedFallback = validateMovieInput({ ...input, watchUrl: undefined });
+      cleanTitle = validatedFallback.cleanTitle;
+      cleanUrl = null;
+      yearNum = validatedFallback.yearNum;
+      runtimeNum = validatedFallback.runtimeNum;
+      isUrlInvalid = true;
+    } else {
+      throw valErr;
+    }
+  }
 
   const supabase = await createClient();
 
@@ -197,8 +228,44 @@ export async function addMovie(input: AddMovieInput): Promise<Movie> {
     throw new Error('Gagal memuat film yang baru disimpan.');
   }
 
+  // ==============================================================================
+  // SINKRONISASI WATCH SOURCES OTOMATIS (PHASE 16.3.1)
+  // ==============================================================================
+  if (isUrlInvalid) {
+    // Skenario D: URL invalid diinput kurator
+    created.watchSourceSync = 'invalid_url';
+  } else if (!cleanUrl || cleanUrl.trim().length === 0) {
+    // Skenario C: Tidak ada Watch URL (opsional)
+    created.watchSourceSync = 'none';
+  } else if (!isValidSourceUrl(cleanUrl)) {
+    // Skenario D lanjutan: Gagal validasi struktur domain / URL
+    created.watchSourceSync = 'invalid_url';
+  } else {
+    try {
+      const { platformName, accessType } = detectPlatformFromUrl(cleanUrl);
+      const source = await createWatchSource({
+        movieId: newId as string,
+        platformName,
+        sourceUrl: cleanUrl,
+        accessType,
+        isPrimary: true,
+        notes: 'Ditambahkan saat kurasi awal film',
+      });
+
+      created.watchSourceSync = 'synced';
+      if (source) {
+        created.watchSources = [source];
+      }
+    } catch (syncErr: unknown) {
+      // Skenario B: Movie berhasil tersimpan, Watch Source gagal/tertunda
+      console.error('Watch Source sync failed for movie:', newId, syncErr);
+      created.watchSourceSync = 'failed';
+    }
+  }
+
   revalidatePath('/');
   revalidatePath('/bank');
+  revalidatePath(`/bank/${newId}`);
 
   return created;
 }
